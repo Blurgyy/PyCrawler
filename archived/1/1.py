@@ -27,12 +27,13 @@ try:
 	# print str(items).decode('utf-8');
 	for i in items:
 		if(not re.search("thumb", i[1])):
-			print i[0];
+			print i[0].strip();
 		else:
 			url_pattern = re.compile(r'src="(.*?)"', re.S);
 			pic_url = "https:" + re.findall(url_pattern, str(i[1]))[0];
-			print i[0];
+			print i[0].strip();
 			print pic_url;
+		print "";
 
 except urllib2.URLError, e:
 	print "error", [url];
