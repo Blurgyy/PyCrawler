@@ -16,7 +16,9 @@ print "getting cookies from", [url];
 file_name = "cookie.txt"
 cookie = cookielib.MozillaCookieJar(file_name);
 handler = urllib2.HTTPCookieProcessor(cookie);
+header = {}
+header['User-Agent'] = "Chrome/71.0.3578.98"
 opener = urllib2.build_opener(handler);
-response = opener.open(url);
+response = opener.open(url, headers = header);
 cookie.save(ignore_discard = True, ignore_expires = True)
 print "cookie file", file_name, "generated";

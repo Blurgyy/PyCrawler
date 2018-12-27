@@ -2,4 +2,4 @@
 # http://curl.haxx.se/rfc/cookie_spec.html
 # This is a generated file!  Do not edit.
 
-szjx.ouc.edu.cn	FALSE	/meol	FALSE		JSESSIONID	1B019B5E720AFC4AFF4301EFF89E6022
+jwgl.ouc.edu.cn	FALSE	/	FALSE		JSESSIONID	B433C8177AF64BF4C34454E01BD12FD3.kingo
