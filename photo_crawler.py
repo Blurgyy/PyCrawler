@@ -1,15 +1,60 @@
 #!/usr/bin/python
+#-*- coding:utf-8 -*-
+__author__ = "Blurgy";
 
-import requests
+"""
+
+Input: search terms
+
+Output: several (could be 0) download links according to search terms
+
+"""
+
 import urllib
-from urllib import urlopen
-import bs4
-from bs4 import BeautifulSoup
+import urllib2
+import re
 import webbrowser
 
-url = "https://www.unsplash.com/"
-search_url = url + "search/photos/"
-query = raw_input();
-query_url = search_url + query;
-# query_url correct
-webbrowser.open(query_url);
+user_agent = "Mozilla/5.0 (X11; Linux x86_64)";
+header = {};
+header['User-Agent'] = user_agent;
+
+base_url = "https://unsplash.com/";
+search_url = base_url + "search/photos/";
+print "Input search terms:"
+search_terms = raw_input();
+search_url = search_url + search_terms;
+try:
+	req = urllib2.Request(search_url);
+	resp = urllib2.urlopen(req);
+	src_code = resp.read();
+	# print(src_code);
+	print "connection status: OK";
+except urllib2.URLError, err:
+	if(hasattr(err, "code")):
+		print "error code =", err.code;
+	if(hasattr(err, "reason")):
+		print "error reason =", err.reason;
+
+hash_pattern = re.compile(r'login_from_photo=(.*?)"');
+all_hash = re.findall(hash_pattern, src_code);
+all_hash = list(set(all_hash));
+pic_no = 0;
+download_url = [];
+for i in all_hash:
+	pic_no = pic_no + 1;
+	download_url.append(base_url + "photos/" + str(i) + "/download?" + str(pic_no) + ".jpg");
+
+print "%d picture(s) in total." % (pic_no);
+for i in download_url:
+	print i;
+
+
+# webbrowser.open(search_url);
+
+"""
+
+https://unsplash.com/photos/uGPBqF1Yls0/download?force=true
+https://unsplash.com/photos/uGPBqF1Yls0/
+
+"""
