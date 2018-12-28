@@ -13,6 +13,8 @@ Output: several (could be 0) download links according to search terms
 import urllib
 import urllib2
 import re
+import os
+import imghdr
 import webbrowser
 
 user_agent = "Mozilla/5.0 (X11; Linux x86_64)";
@@ -49,6 +51,21 @@ print "%d picture(s) in total." % (pic_no);
 for i in download_url:
 	print i;
 
+pic_no = 0;
+for i in download_url:
+	pic_no += 1;
+	print "downloading pic no.:", [pic_no], "...";
+	data = urllib2.urlopen(i).read();
+	file_name = str(pic_no);
+	f = open(file_name, 'wb');
+	f.write(data);
+	f.close();
+	img_type = imghdr.what(file_name);
+	image_file_name = file_name + "." + img_type;
+	os.rename(file_name, image_file_name);
+	print "downloaded image as", image_file_name;
+	print "";
+print "download finished, abort."
 
 # webbrowser.open(search_url);
 
