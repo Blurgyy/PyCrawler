@@ -2,7 +2,7 @@
 
 ## 2018.12.28
 
-（不想复习）
+(不想复习)
 
 根据输入的搜索条件爬取 [`unsplash`](https://unsplash.com/) 的图片
 
@@ -12,3 +12,4 @@
 
 最多下载 10 张 (for now)
 
+速度极慢， (是 [`unsplash`](https://unsplash.com/) 的锅)
