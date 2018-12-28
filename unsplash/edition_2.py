@@ -8,7 +8,7 @@ Runs on Python 2.7.15rc1
 
 Input: Search terms
 
-Output: Save result images(quantity: 0 to 10) in search-term-specified directory
+Output: Save result images(quantity: 0 to 10) in a search-term-specified directory
 
 """
 

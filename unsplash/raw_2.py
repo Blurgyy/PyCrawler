@@ -8,7 +8,7 @@ Python 3.6.4
 
 Input: Search terms
 
-Output: Save result images(quantity: 0 to 10) in search-term-specified directory
+Output: Save result images(quantity: 0 to 10) in a search-term-specified directory
 
 """
 
