@@ -4,7 +4,7 @@
 
 （不想复习）
 
-根据输入的搜索条件爬取 [`unsplash`](https://unsplash.com/) 网站的图片
+根据输入的搜索条件爬取 [`unsplash`](https://unsplash.com/) 的图片
 
 输入只接受 英文
 
