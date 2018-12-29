@@ -50,7 +50,7 @@ class unsplash:
 		self.quantity_pattern = re.compile(r'_3vsmH _1iWCF xLon9.*?>(.*?)</span>');
 		self.quantity = re.findall(self.quantity_pattern, src_code)[0];
 		if self.debug_mode:
-			print("total: %s images" % (self.quantity));
+			print("total: %s image(s)" % (self.quantity));
 		tmp = 0.0;
 		coeffecient = 1.0;
 		dot = False;
@@ -157,7 +157,7 @@ class unsplash:
 		try:
 			socket.setdefaulttimeout(self.time_out);
 			if self.debug_mode:
-				print("default time out set to %d" % (self.time_out));
+				print("performing download action, url=\"%s\"" % (link));
 			urllib.request.urlretrieve(link, dl_location, self.completion);
 		except socket.timeout:
 			print("image %s timed out" % (dl_location));
