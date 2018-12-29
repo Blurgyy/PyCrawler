@@ -8,7 +8,7 @@ Runs on Python 2.7.15rc1
 
 Input: Search terms
 
-Output: Save result images(quantity: 0 to 10) in a search-term-specified directory
+Output: Save result images in a search-term-specified directory
 
 """
 
@@ -29,6 +29,7 @@ def print_help_doc():
     print "\t-n <x> : set maximum simutaneous downloads to int(x)";
     print "\t-t <x> : set downloading timeout to float(x) (in seconds)";
     print "\t-m <x> : set maximum items to int(x)";
+    print "\n\n\tCTRL+C to quit.";
 
 class unsplash:
     def __init__(self, _debug_mode = False, _show_pct_bar = False, _hashes_per_page = 6, _download_time_out = 20.0, _max_items_cnt = 1000):
@@ -57,7 +58,7 @@ class unsplash:
         self.quantity_pattern = re.compile(r'_3vsmH _1iWCF xLon9.*?>(.*?)</span>');
         self.quantity = re.findall(self.quantity_pattern, src_code)[0];
         if self.debug_mode:
-            print "total: %s images" % (self.quantity);
+            print "total: %s image(s)" % (self.quantity);
         tmp = 0.0;
         coeffecient = 1.0;
         dot = False;
@@ -75,7 +76,7 @@ class unsplash:
         self.quantity = tmp;
         if self.debug_mode:
             print "self.quantity = %d, self.max_items_cnt = %d" % (self.quantity, self.max_items_cnt);
-        print "%d images found, starting download" % (self.quantity);
+        print "%d image(s) found, starting download" % (self.quantity);
 
     def input_search_terms(self):
         print "Input search terms:";
@@ -101,7 +102,7 @@ class unsplash:
             if self.debug_mode:
                 print "fetched";
             return self.src_code;
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             print "error opening url: %s" % (url);
             if(hasattr(e, "code")):
                 print "error code = %s" % (e.code);
@@ -130,14 +131,14 @@ class unsplash:
 
     def get_dl_links(self, dl_url):
         if not re.search("download", dl_url):
-            print "invalid download link, abort"
+            print "invalid download link, abort";
             return;
         try:
             socket.setdefaulttimeout(None);
             self.req = urllib2.Request(dl_url, headers = self.headers);
             self.resp = urllib2.urlopen(self.req);
             return self.resp.url;
-        except urllib2.URLError, e:
+        except urllib2.URLError as e:
             print "error handling link \"%s\"" % (dl_url);
             if(hasattr(e, "code")):
                 print "error code = %s" % (e.code);
@@ -164,10 +165,10 @@ class unsplash:
         try:
             socket.setdefaulttimeout(self.time_out);
             if self.debug_mode:
-                print("performing download action with url\"%s\"" % (link));
-            urllib.urlretrieve(link, dl_location, self.completion);
+                print "performing download action with url\"%s\"" % (link);
+            urllib2.urlretrieve(link, dl_location, self.completion);
         except socket.timeout:
-            print "image %s timed out" % (final_file_name);
+            print "image %s timed out" % (dl_location);
 
         fname = fname + "." + str(self.img_type(dl_location));
         final_file_name = fpath + fname;
@@ -184,7 +185,7 @@ class unsplash:
         self.threads = [];
         for i in range(1, 10000000):
             if (i - 1) * self.hashes_per_page > min(self.quantity, self.max_items_cnt):
-                print "all images have been crawled";
+                print "all image(s) have been crawled";
                 break;
             self.get_json_page_url(i);
             json_document = self.get_src_code(self.page_url);
@@ -197,7 +198,7 @@ class unsplash:
                 img_id += 1;
                 dl_link = self.get_dl_links(dl_link_masked);
                 self.dl_links.append(dl_link);
-                print "[image no.%d: connecting... it will soon be downloaded]" % (img_id);
+                print "[image no.%d/%d: connecting... it will soon be downloaded]" % (img_id, max(img_id, min(self.quantity, self.max_items_cnt)));
                 self.fpath = self.search_terms + "/";
                 fname = str(img_id) + "-" + str(int(time.time()));
                 
@@ -219,7 +220,7 @@ class unsplash:
     def show_finish_message(self):
         for thread in self.thread_rec:
             thread.join();
-        print "total: %d images saved to %s" % (self.dl_cnt, self.fpath);
+        print "total: %d image(s) saved to %s" % (self.dl_cnt, self.fpath);
 
 
 # default:
@@ -274,7 +275,7 @@ while i < top:
         except Exception as e:
             print e;
     else:
-        print "invalid syntax"
+        print "invalid syntax";
     i += 1;
 
 if d_set: print "debug_mode is on";
