@@ -52,7 +52,7 @@ class unsplash:
         if(pct > 100.0):
             pct = 100.0;
         if self.show_pct_bar:
-            print("completion: %.3f%% done                                                      \x1B[1A" % pct);
+            print("completion: %.3f%% done                                                " % pct, end = "\r");
 
     def get_quantity(self):
         src_code = self.get_src_code(self.search_url);
