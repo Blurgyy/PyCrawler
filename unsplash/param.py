@@ -24,12 +24,24 @@ import time
 import threading
 import sys
 
+help_doc = """
+ 
+    usage: %s -[option] [value]
+
+                -s: show download percentage while downloading image(s)
+                   **NOTE**: this fuction is **VERY UNDER-DEVELOPED**
+
+                -n <x> : set maximum simutaneous downloads to int(x)
+                -t <x> : set downloading timeout to float(x) (in seconds)"
+                -m <x> : set maximum items to int(x)"
+
+
+              CTRL+C to quit.
+
+""" % (sys.argv[0]);
+
 def print_help_doc():
-    print "usage: %s\n\t-s: show download percentage while downloading image(s)\n\t**NOTE**: this fuction is **VERY UNDER-DEVELOPED**\n" % (sys.argv[0]);
-    print "\t-n <x> : set maximum simutaneous downloads to int(x)";
-    print "\t-t <x> : set downloading timeout to float(x) (in seconds)";
-    print "\t-m <x> : set maximum items to int(x)";
-    print "\n\n\tCTRL+C to quit.";
+    print help_doc;
 
 class unsplash:
     def __init__(self, _debug_mode = False, _show_pct_bar = False, _hashes_per_page = 6, _download_time_out = 20.0, _max_items_cnt = 1000):
