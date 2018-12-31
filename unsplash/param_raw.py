@@ -23,15 +23,24 @@ import time
 import threading
 import sys
 
-def print_help_doc():
-    print("usage: %s\n\t-s: show download percentage while downloading image(s)\n\t**NOTE**: this fuction is **VERY UNDER-DEVELOPED**\n" % (sys.argv[0]));
-    print("\t-n <x> : set maximum simutaneous downloads to int(x)");
-    print("\t-t <x> : set downloading timeout to float(x) (in seconds)");
-    print("\t-m <x> : set maximum items to int(x)");
-    print("\n\n\tCTRL+C to quit.");
+help_doc = """
+ 
+    usage: %s -[option] [value]
 
-def quit_session():
-    1;  # fake function, literally no use
+                -s: show download percentage while downloading image(s)
+                   **NOTE**: this fuction is **VERY UNDER-DEVELOPED**
+
+                -n <x> : set maximum simutaneous downloads to int(x)
+                -t <x> : set downloading timeout to float(x) (in seconds)"
+                -m <x> : set maximum items to int(x)"
+
+
+              CTRL+C to quit.
+
+""" % (sys.argv[0]);
+
+def print_help_doc():
+    print(help_doc);
 
 class unsplash:
     def __init__(self, _debug_mode = False, _show_pct_bar = False, _hashes_per_page = 6, _download_time_out = 20.0, _max_items_cnt = 1000):
@@ -78,13 +87,13 @@ class unsplash:
         self.quantity = tmp;
         if self.debug_mode:
             print("self.quantity = %d, self.max_items_cnt = %d" % (self.quantity, self.max_items_cnt));
-        print("%d image(s) found, starting download" % (self.quantity));
+        print("(approximately) %d image(s) found, starting download" % (self.quantity));
 
     def input_search_terms(self):
         print("Input search terms:");
         self.search_terms = urllib.request.quote(input());
         self.search_url = self.base_url + "search/photos/" + self.search_terms;
-        print("ok reqeusting images of %s" % (self.search_terms));
+        print("ok requesting images of %s" % (self.search_terms));
         if not os.path.exists(self.search_terms + "/downloading/"):
             os.makedirs(self.search_terms + "/downloading/");
             print("Created directory %s" % (self.search_terms + "/downloading/"));
@@ -171,6 +180,8 @@ class unsplash:
             urllib.request.urlretrieve(link, dl_location, self.completion);
         except socket.timeout:
             print("image %s timed out" % (dl_location));
+            os.rename(dl_location, dl_location + ".download-timed-out");
+            return None;
 
         fname = fname + "." + str(self.img_type(dl_location));
         final_file_name = fpath + fname;
@@ -244,10 +255,10 @@ i = 1;
 
 if top == 2 and re.match('--help', sys.argv[1]):
     print_help_doc();
-    while True:
-        quit_session();
+    quit();
 
-print("use %s --help to see help document\n" % (sys.argv[0]));
+print("use [%s --help] to see help document" % (sys.argv[0]));
+print("CTRL+C to quit\n");
 
 while i < top:
     if re.search('!', sys.argv[i]):
@@ -262,28 +273,28 @@ while i < top:
             _hashes_per_page = int(sys.argv[i]);
             n_set = True;
         except Exception as e:
-            print(e);
+            raise e;
     elif re.search('t', sys.argv[i]):
         i += 1;
         try:
             _download_time_out = float(sys.argv[i]);
             t_set = True;
         except Exception as e:
-            print(e);
+            raise e;
     elif re.search('m', sys.argv[i]):
         i += 1;
         try:
             _max_items_cnt = int(sys.argv[i]);
             m_set = True;
         except Exception as e:
-            print(e);
+            raise e;
     else:
         print("invalid syntax");
     i += 1;
 
 if d_set: print("debug_mode is on");
-if s_set: print("show_pct_bar = True");
-print("download %d image(s) (or more) simutaneously" % (_hashes_per_page));
+if d_set or s_set: print("show_pct_bar = True");
+print("start download action at %d-th image" % (_hashes_per_page));
 print("download time out set to %f second(s)" % (_download_time_out));
 print("max download items: %d" % (_max_items_cnt));
 

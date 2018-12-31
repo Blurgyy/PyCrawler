@@ -292,7 +292,7 @@ while i < top:
 
 if d_set: print "debug_mode is on";
 if s_set: print "show_pct_bar = True";
-print "download %d image(s) (or more) simutaneously" % (_hashes_per_page);
+print "start download action at %d-th image" % (_hashes_per_page);
 print "download time out set to %f second(s)" % (_download_time_out);
 print "max download items: %d" % (_max_items_cnt);
 
