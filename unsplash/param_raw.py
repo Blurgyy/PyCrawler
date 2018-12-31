@@ -178,9 +178,11 @@ class unsplash:
             if self.debug_mode:
                 print("performing download action with url\"%s\"" % (link));
             urllib.request.urlretrieve(link, dl_location, self.completion);
+            socket.setdefaulttimeout(None);
         except socket.timeout:
             print("image %s timed out" % (dl_location));
             os.rename(dl_location, dl_location + ".download-timed-out");
+            socket.setdefaulttimeout(None);
             return None;
 
         fname = fname + "." + str(self.img_type(dl_location));
