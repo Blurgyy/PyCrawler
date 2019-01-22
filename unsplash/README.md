@@ -1,6 +1,6 @@
 # Unsplash
 
-[![](https://img.shields.io/badge/LICENSE-MIT-brightgreen.svg)](https://github.com/Blurgyy/PyCrawler/blob/master/LICENSE)
+[![](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/Blurgyy/PyCrawler/blob/master/LICENSE)
 
 ## Overall 
 
