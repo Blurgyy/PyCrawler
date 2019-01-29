@@ -178,7 +178,7 @@ class unsplash:
             socket.setdefaulttimeout(self.time_out);
             if self.debug_mode:
                 print("performing download action with url\"%s\"" % (link));
-            urllib.urlretrieve(link, dl_location, self.completion);
+            urllib.request.urlretrieve(link, dl_location, self.completion);
         except socket.timeout:
             print("image %s timed out" % (dl_location));
 
