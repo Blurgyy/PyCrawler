@@ -209,14 +209,15 @@ class tvseries:
                 for url in req_m3u8_urls:
                     m3u8_metadata = get_content(url);
                     # print(m3u8_metadata);
-                    tmp_m3u8_url = re.findall(r'(http[s]?://[a-zA-Z0-9/-_\.]*?m3u8)', m3u8_metadata);
+                    # tmp_m3u8_url = re.findall(r'(http[s]?://.*?m3u8)', m3u8_metadata);
+                    tmp_m3u8_url = re.findall(r'(http[s]?://[a-zA-Z0-9-/_\.]*?m3u8)', m3u8_metadata);
+                    # print(tmp_m3u8_url);
                     if(len(_m3u8_url) < len(tmp_m3u8_url)):
                         _m3u8_url = tmp_m3u8_url;
                 iterator = 0;
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
-                print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
-                if(len(single_episodes_raw) > len(_m3u8_url)):
-                    print("warning: %d viedo(s) will not be downloaded" % (len(single_episodes_raw) - len(_m3u8_url)));
+                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                print("%d viedo(s) will be downloaded" % (len(_m3u8_url)));
                 for single_episode in single_episodes_raw:
                     # print("%d-th url:" % iterator, end = "");
                     # print(" %s" % (_m3u8_url[iterator]));
