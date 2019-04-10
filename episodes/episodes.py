@@ -183,6 +183,7 @@ class tvseries:
 
     def process(self, ):
         try:
+            ret = False;
             self.episodes = [];
             content = get_content(self.base_url);
             if(split_host(self.base_url) == "https://91mjw.com"):
@@ -191,6 +192,8 @@ class tvseries:
                 print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
                     self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epid = (single_episode[1].strip()), _from_series = self));
+                    ret = True;
+                return ret;
             elif(split_host(self.base_url) == "http://www.fjisu.com"):
                 # print(content);
                 all_episodes_raw = re.findall(r'(<ul class="details-con2-list">.*?</ul|<ul class="details-con2-list">.*?</div)', content, flags = re.S)[0];
@@ -206,29 +209,35 @@ class tvseries:
                 for url in req_m3u8_urls:
                     m3u8_metadata = get_content(url);
                     # print(m3u8_metadata);
-                    tmp_m3u8_url = re.findall(r'(https?://.*?m3u8)', m3u8_metadata);
+                    tmp_m3u8_url = re.findall(r'(http[s]?://[a-zA-Z0-9/-_\.]*?m3u8)', m3u8_metadata);
                     if(len(_m3u8_url) < len(tmp_m3u8_url)):
                         _m3u8_url = tmp_m3u8_url;
                 iterator = 0;
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
                 print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
                 if(len(single_episodes_raw) > len(_m3u8_url)):
-                    print("warning: %d viedo(s) will not be downloaded" % (len(single_episodes_raw), len(single_episodes_raw) - len(_m3u8_url)));
+                    print("warning: %d viedo(s) will not be downloaded" % (len(single_episodes_raw) - len(_m3u8_url)));
                 for single_episode in single_episodes_raw:
                     # print("%d-th url:" % iterator, end = "");
                     # print(" %s" % (_m3u8_url[iterator]));
                     self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epid = (single_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = _m3u8_url[iterator]));
+                    ret = True;
                     iterator += 1;
+                return ret;
             else:
                 print("inexplicit info when processing %s(%s), abort" % (self.sname, self.base_url));
+                return ret;
         except Exception as e:
             print("episodes.py::tvseries::process(): %s" % e);
+            return ret;
 
     def Download(self, ):
         try:
             for ep in self.episodes:
                 if(ep.Download()):  # Download performed normaly
                     time.sleep(random.randint(2, 5));
+                else:
+                    continue;
         except Exception as e:
             print("episodes.py::tvseries::Download(): %s" % e);
 
@@ -324,8 +333,10 @@ class crawl:
                 Id = self.select();
             if(Id != None):
                 for i in Id:
-                    self.series[i].process();
-                    self.series[i].Download();
+                    if(self.series[i].process()):
+                        self.series[i].Download();
+                    else:
+                        continue;
         except Exception as e:
             print("episodes.py::crawl::Download(): %s" % e);
 
