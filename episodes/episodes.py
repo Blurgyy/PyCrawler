@@ -309,6 +309,12 @@ class crawl:
                 for i in entrylist:
                     if(len(i) == 0):
                         continue;
+                    elif(re.match(r'\*', i)):
+                    	print("ok selected all");
+                    	ret = [];
+                    	for iid in range(len(self.series)):
+                    		ret.append(iid);
+                    	return ret;
                     elif(re.match(r'!+', i)):
                         print("signal captured, abort");
                         return None;
