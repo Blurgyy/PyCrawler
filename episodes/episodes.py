@@ -30,6 +30,9 @@ def create_headers():
             # 'X-FORWARDED-FOR': ip
         }
         return headers;
+    except KeyboardInterrupt:
+    	print("\n KeyboardInterrupt, exiting");
+    	exit();
     except Exception as e:
         print("episodes.py::create_headers(): %s" % e);
         return None;
@@ -38,6 +41,9 @@ def get_content(url, headers = create_headers(), proxies = {'http': "http://61.1
     try:
         content = requests.get(url, headers = headers, timeout = timeout).text;
         return html.unescape(content.encode('latin-1', 'ignore').decode('utf-8', 'ignore'));
+    except KeyboardInterrupt:
+    	print("\n KeyboardInterrupt, exiting");
+    	exit();
     except Exception as e:
         print("episodes.py::get_content(): %s" % e);
         return None;
@@ -54,6 +60,9 @@ class episode:
             self.m3u8_url = _m3u8_url;
             self.tvid = None;
             self.m3u8 = None;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::episode::__init__(): %s" % e);
 
@@ -73,6 +82,9 @@ class episode:
             else:
                 print("no tvid found");
             return self.tvid;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::episode::g_tvid(): %s" % e);
             return None;
@@ -121,6 +133,9 @@ class episode:
                     nurl = split_host(url) + nurl;
                 self.m3u8_unify(nurl);
             return self.m3u8;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::episodes::m3u8_unify(): %s" % e);
             return None;
@@ -142,6 +157,9 @@ class episode:
                 return True;
             else:
                 return False;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::episode::Download(): %s" % e);
             return False;
@@ -160,6 +178,9 @@ class tvseries:
                 self.parse_json(jsontext);
             else:
                 print("class <tvseries> need more argument");
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::tvseries::__init__(): %s" % e);
 
@@ -168,6 +189,9 @@ class tvseries:
             tmp = re.findall(r'<a title=".*?/(.*?)在线.*?".*?href="(.*?)"', htmltext)[0];
             self.sname = tmp[0].replace('/', '-').strip();
             self.base_url = tmp[1].strip();
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::tvseries::parse_html(): %s" % e);
 
@@ -178,6 +202,9 @@ class tvseries:
             self.sname = tmp[1].replace('/', '-').strip();
             self.base_url = tmp[0].strip();
             self._hash = self.base_url.strip('/').split('/')[-1];
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::tvseries::parse_json(): %s" % e);
 
@@ -228,6 +255,9 @@ class tvseries:
             else:
                 print("inexplicit info when processing %s(%s), abort" % (self.sname, self.base_url));
                 return ret;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::tvseries::process(): %s" % e);
             return ret;
@@ -239,6 +269,9 @@ class tvseries:
                     time.sleep(random.randint(2, 5));
                 else:
                     continue;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::tvseries::Download(): %s" % e);
 
@@ -252,6 +285,9 @@ class crawl:
             self.s_url.append(self.base_url[0] + "?s=");
             self.s_url.append(self.base_url[1] + "sssv.php?top=10&q=")
             self.series = [];
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::crawl::__init__(): %s", e);
 
@@ -270,6 +306,9 @@ class crawl:
                     x = tvseries(htmltext);
                     if(x.sname != None):
                         self.series.append(x);
+            except KeyboardInterrupt:
+            	print("\n KeyboardInterrupt, exiting");
+            	exit();
             except Exception as e:
                 print("%s, skipping" % e);
 
@@ -284,9 +323,15 @@ class crawl:
                         self.series.append(x);
                 if(len(self.series) == 0):
                     print("No TVseries Found about %s" % str(term));
+            except KeyboardInterrupt:
+            	print("\n KeyboardInterrupt, exiting");
+            	exit();
             except Exception as e:
                 print("%s, skipping" % e);
             return self.series;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::crawl::search(): %s" % e);
             return None;
@@ -330,6 +375,9 @@ class crawl:
                 else:
                     print();
                     return ret;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::crawl::select(): %s" % e);
             return None;
@@ -344,6 +392,9 @@ class crawl:
                         self.series[i].Download();
                     else:
                         continue;
+        except KeyboardInterrupt:
+        	print("\n KeyboardInterrupt, exiting");
+        	exit();
         except Exception as e:
             print("episodes.py::crawl::Download(): %s" % e);
 
@@ -354,5 +405,8 @@ if(__name__ == "__main__"):
         x = crawl();
         x.search("钢铁侠");
         x.Download();
+    except KeyboardInterrupt:
+    	print("\n KeyboardInterrupt, exiting");
+    	exit();
     except Exception as e:
         print("???????, %s" % e);
