@@ -12,6 +12,8 @@ import socket
 import struct
 from urllib.parse import quote
 import shutil
+import sys
+import select
 
 
 def do_nothing():
@@ -150,6 +152,7 @@ class episode:
             self.dl_option = self.from_series.dl_option;
             if(self.dl_option == "dd" or self.dl_option == "ddd"):
                 return False;
+            select_timeout = 6;
             if(not os.path.exists(self.from_series.sname)):
                 os.makedirs(self.from_series.sname);
             fname = self.from_series.sname + '/' + str(self.epid) + ".m3u8";
@@ -166,9 +169,13 @@ class episode:
 \t\033[1;32md\033[0m: delete (only this file) and skip
 \t\033[1;32mdd\033[0m: delete (all files in this folder, but keep the folder) and abort
 \t\033[1;32mddd\033[0m: delete (this whole folder, not keeping the folder) abort
-select one from above, and press \033[1;34mENTER\033[0m (\033[1;32ms\033[0m by default): """, end = "");
-                    self.dl_option = input().strip();
-                    print();
+\nselect an option from above, and press \033[1;34mENTER\033[0m\n(%d seconds of inactivity will be considered as entering \033[1;32ms\033[0m): """ % (select_timeout, ), end = "");
+                    # self.dl_option = input().strip();
+                    self.dl_option = 's';
+                    a, b, c = select.select([sys.stdin], [], [], select_timeout);
+                    if(a):
+                        self.dl_option = sys.stdin.readline().strip();
+                    print("\n");
                 if(self.dl_option == 'N' or self.dl_option == 'O' or self.dl_option == 'S' or self.dl_option == "dd" or self.dl_option == "ddd"):
                     self.from_series.dl_option = self.dl_option;
                 if(self.dl_option == 'n' or self.dl_option == 'N'):
@@ -388,14 +395,14 @@ class crawl:
             if(len(self.series) == 0):
                 print("nothing to select, abort");
                 return None;
-            print("Search Results(%d):" % len(self.series));
+            print("Search Results(\033[1m%d\033[0m):" % len(self.series));
             for i in range(len(self.series)):
-                print("\t%02d. %s" % (i+1, self.series[i].sname));
+                print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
             # print("\nselect by entering the id of the desired TVseries (enter ! to abort): ", end = "");
             entryid = "";
             ret = [];
             while(len(entryid) == 0):
-                print("select by entering the id of the desired TVseries (enter ! to abort): ", end = "");
+                print("select by entering the id of the desired TVseries (enter \033[1;34m!\033[0m to abort): ", end = "");
                 entryid = input().strip();
                 entrylist = entryid.split();
                 for i in entrylist:
