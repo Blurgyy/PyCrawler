@@ -285,6 +285,7 @@ class tvseries:
                 # print("single_episodes_raw is fine");
                 # print("single_episodes_raw = %s" % single_episodes_raw);
                 req_m3u8_urls = re.findall(r'src="(.*?%s.*?)"' % self._hash, get_content(self.base_url + single_episodes_raw[0][0]));
+                # print(req_m3u8_urls);
                 _m3u8_url = [];
                 for url in req_m3u8_urls:
                     # print(url);
@@ -300,8 +301,14 @@ class tvseries:
                 print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
                 print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
-                    episode_id = int(m3u8_url[-1].strip('",)'));
-                    current_episode = single_episodes_raw[episode_id-1];
+                    # print(m3u8_url);
+                    current_episode = single_episodes_raw[0];
+                    if(m3u8_url[-1].isdigit()):
+                        episode_id = int(m3u8_url[-1].strip('",)'));
+                        current_episode = single_episodes_raw[episode_id-1];
+                    else:
+                        episode_id = m3u8_url[-1].replace('%', '\\');
+                        current_episode = ["tvseries::processing_generated", episode_id];
                     self.episodes.append(episode(_base_url = self.base_url + current_episode[0], _epid = (current_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = m3u8_url[0]));
                     ret = True;
                 return ret;
