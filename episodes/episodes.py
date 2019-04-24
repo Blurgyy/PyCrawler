@@ -11,8 +11,11 @@ import random
 import socket
 import struct
 from urllib.parse import quote
+import shutil
 
 
+def do_nothing():
+    pass;
 def is_url(x):
     return not not re.match(r'^https?://\w.+$', x);
 def split_host(x):
@@ -34,10 +37,10 @@ def create_headers():
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("episodes.py::create_headers(): %s" % e);
+        print("\033[1;31mepisodes.py::create_headers(): %s\033[0m" % e);
         return None;
 
-def get_content(url, headers = create_headers(), proxies = {'http': "http://61.184.109.33:61320", 'https': "https://210.5.10.87:53281"}, timeout = 6.0, ):
+def get_content(url, headers = create_headers(), proxies = {'http': "http://61.184.109.33:61320", 'https': "https://210.5.10.87:53281"}, timeout = 9.9, ):
     try:
         content = requests.get(url, headers = headers, timeout = timeout).text;
         return html.unescape(content.encode('latin-1', 'ignore').decode('utf-8', 'ignore'));
@@ -45,12 +48,12 @@ def get_content(url, headers = create_headers(), proxies = {'http': "http://61.1
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("episodes.py::get_content(): %s" % e);
+        print("\033[1;31mepisodes.py::get_content(): %s\033[0m" % e);
         return None;
 
 #### Episodes
 class episode:
-    def __init__(self, _base_url = None, _epid = None, _from_series = None, HASH = None, _m3u8_url = None):
+    def __init__(self, _base_url = None, _epid = None, _from_series = None, HASH = None, _m3u8_url = None, ):
         try:
             # print("initalizing episode with (%s, %s, %s), m3u8_url = %s" % (_base_url, str(_epid), _from_series, _m3u8_url));
             self.base_url = _base_url;
@@ -60,11 +63,12 @@ class episode:
             self.m3u8_url = _m3u8_url;
             self.tvid = None;
             self.m3u8 = None;
+            self.dl_option = "";
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::episode::__init__(): %s" % e);
+            print("\033[1;31mepisodes.py::episode::__init__(): %s\033[0m" % e);
 
     def g_tvid(self, ):
         try:
@@ -86,7 +90,7 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::episode::g_tvid(): %s" % e);
+            print("\033[1;31mepisodes.py::episode::g_tvid(): %s\033[0m" % e);
             return None;
 
     def m3u8_unify(self, url = None):
@@ -137,23 +141,65 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::episodes::m3u8_unify(): %s" % e);
+            print("\033[1;31mepisodes.py::episodes::m3u8_unify(): %s\033[0m" % e);
             return None;
 
-    def Download(self, ):   # as *.m3u8
+    def Download(self, ):   # as *.m3u8, returns True if a download action has been done, returns False otherwise.
         try:
             # self.g_tvid();
+            self.dl_option = self.from_series.dl_option;
+            if(self.dl_option == "dd" or self.dl_option == "ddd"):
+                return False;
             if(not os.path.exists(self.from_series.sname)):
                 os.makedirs(self.from_series.sname);
             fname = self.from_series.sname + '/' + str(self.epid) + ".m3u8";
             if(os.path.exists(fname)):
-                print("file [%s] already exists, skipping..." % fname);
-                return False;
+                # print("file [%s] already exists, skipping..." % fname);
+                if(self.dl_option == ""):
+                    print("\033[1;37;43mfile [%s] already exists.\033[0m" % fname);
+                    print("""\t\033[1;32mn\033[0m: download, but using a different name (only this file)
+\t\033[1;32mN\033[0m: download, but using different names (all following duplicated files)
+\t\033[1;32mo\033[0m: overwrite (only this file)
+\t\033[1;32mO\033[0m: overwrite (all following duplicated files)
+\t\033[1;32ms\033[0m: skip (only this file)
+\t\033[1;32mS\033[0m: skip (all following duplicated files)
+\t\033[1;32md\033[0m: delete (only this file) and skip
+\t\033[1;32mdd\033[0m: delete (all files in this folder, but keep the folder) and abort
+\t\033[1;32mddd\033[0m: delete (this whole folder, not keeping the folder) abort
+select one from above, and press \033[1;34mENTER\033[0m (\033[1;32ms\033[0m by default): """, end = "");
+                    self.dl_option = input().strip();
+                    print();
+                if(self.dl_option == 'N' or self.dl_option == 'O' or self.dl_option == 'S' or self.dl_option == "dd" or self.dl_option == "ddd"):
+                    self.from_series.dl_option = self.dl_option;
+                if(self.dl_option == 'n' or self.dl_option == 'N'):
+                    duplicate_id = 2;
+                    fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
+                    while(os.path.exists(fname)):
+                        duplicate_id += 1;
+                        fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
+                elif(self.dl_option == 'o' or self.dl_option == 'O'):
+                    do_nothing();
+                elif(self.dl_option == 'd'):
+                    os.remove(fname);
+                    return False;
+                elif(self.dl_option == 'dd'):
+                    print("ok deleting files in folder [%s]" % (self.from_series.sname, ));
+                    shutil.rmtree(self.from_series.sname);
+                    os.makedirs(self.from_series.sname);
+                    return False;
+                elif(self.dl_option == 'ddd'):
+                    print("ok deleting folder [%s]" % (self.from_series.sname, ));
+                    shutil.rmtree(self.from_series.sname);
+                    return False;
+                else:
+                    # do_nothing();
+                    return False;
+                # return False;
             if(self.m3u8_unify()):
                 # print(self.m3u8);
                 with open(fname, 'wb') as f:
                     f.write(self.m3u8.encode());
-                print("[%s] episode [%s] downloaded as [%s]" % (self.from_series.sname, str(self.epid), fname));
+                print("\033[1m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epid), fname));
                 return True;
             else:
                 return False;
@@ -161,7 +207,7 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::episode::Download(): %s" % e);
+            print("\033[1;31mepisodes.py::episode::Download(): %s\033[0m" % e);
             return False;
 
 #### Series
@@ -172,6 +218,7 @@ class tvseries:
             self.base_url = None;
             self._hash = None;
             self.episodes = [];
+            self.dl_option = "";
             if(htmltext != None):
                 self.parse_html(htmltext);
             elif(jsontext != None):
@@ -182,7 +229,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::tvseries::__init__(): %s" % e);
+            print("\033[1;31mepisodes.py::tvseries::__init__(): %s\033[0m" % e);
 
     def parse_html(self, htmltext, ):
         try:
@@ -193,7 +240,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::tvseries::parse_html(): %s" % e);
+            print("\033[1;31mepisodes.py::tvseries::parse_html(): %s\033[0m" % e);
 
     def parse_json(self, jsontext, ):
         try:
@@ -206,7 +253,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::tvseries::parse_json(): %s" % e);
+            print("\033[1;31mepisodes.py::tvseries::parse_json(): %s\033[0m" % e);
 
     def process(self, ):
         try:
@@ -244,7 +291,7 @@ class tvseries:
                     # print("ITERING: tmp_m3u8_url = %s" % tmp_m3u8_url);
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
                 print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                print("%d viedo(s) will be downloaded" % (len(_m3u8_url)));
+                print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
                     episode_id = int(m3u8_url[-1].strip('",)'));
                     current_episode = single_episodes_raw[episode_id-1];
@@ -258,21 +305,22 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::tvseries::process(): %s" % e);
+            print("\033[1;31mepisodes.py::tvseries::process(): %s\033[0m" % e);
             return ret;
 
     def Download(self, ):
         try:
             for ep in self.episodes:
                 if(ep.Download()):  # Download performed normaly
-                    time.sleep(random.randint(2, 5));
+                    time.sleep(random.randint(1, 3));
                 else:
                     continue;
+            print("\033[1;42;37mall pending downloads have been done, exiting\033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::tvseries::Download(): %s" % e);
+            print("\033[1;31mepisodes.py::tvseries::Download(): %s\033[0m" % e);
 
 
 #### Global
@@ -288,7 +336,7 @@ class crawl:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::crawl::__init__(): %s", e);
+            print("\033[1;31mepisodes.py::crawl::__init__(): %s\033[0m", e);
 
     def search(self, term = "", ):
         try:
@@ -309,7 +357,7 @@ class crawl:
                 print("\n KeyboardInterrupt, exiting");
                 exit();
             except Exception as e:
-                print("%s, skipping" % e);
+                print("\033[1;31m%s, skipping\033[0m" % e);
 
             try: # base_url[1]
                 targ_url = self.s_url[1] + quote(str(term));
@@ -326,13 +374,13 @@ class crawl:
                 print("\n KeyboardInterrupt, exiting");
                 exit();
             except Exception as e:
-                print("%s, skipping" % e);
+                print("\033[1;31m%s, skipping\033[0m" % e);
             return self.series;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::crawl::search(): %s" % e);
+            print("\033[1;31mepisodes.py::crawl::search(): %s\033[0m" % e);
             return None;
 
     def select(self, ):
@@ -378,7 +426,7 @@ class crawl:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::crawl::select(): %s" % e);
+            print("\033[1;31mepisodes.py::crawl::select(): %s\033[0m" % e);
             return None;
 
     def Download(self, Id = None):
@@ -395,7 +443,7 @@ class crawl:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("episodes.py::crawl::Download(): %s" % e);
+            print("\033[1;31mepisodes.py::crawl::Download(): %s\033[0m" % e);
 
 
 if(__name__ == "__main__"):
@@ -408,4 +456,4 @@ if(__name__ == "__main__"):
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("???????, %s" % e);
+        print("\033[1;31m???????, %s\033[0m" % e);
