@@ -302,13 +302,19 @@ class tvseries:
                 print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
                     # print(m3u8_url);
-                    current_episode = single_episodes_raw[0];
+                    current_episode = None;
                     if(m3u8_url[-1].isdigit()):
                         episode_id = int(m3u8_url[-1].strip('",)'));
                         current_episode = single_episodes_raw[episode_id-1];
                     else:
                         episode_id = m3u8_url[-1].replace('%', '\\');
-                        current_episode = ["tvseries::processing_generated", episode_id];
+                        episode_id = episode_id.encode('latin-1').decode('unicode-escape');
+                        for x in single_episodes_raw:
+                            if(x[1].strip() == episode_id):
+                                current_episode = x;
+                                break;
+                        if(current_episode == None):
+                            current_episode = ["tvseries::processing_generated", episode_id];
                     self.episodes.append(episode(_base_url = self.base_url + current_episode[0], _epid = (current_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = m3u8_url[0]));
                     ret = True;
                 return ret;
