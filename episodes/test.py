@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-import episodes
+import crawl
 
-x = episodes.crawl();
+x = crawl.crawler();
 x.search();
 x.Download();

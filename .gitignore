@@ -1,3 +1,10 @@
+# Compressed files
+*.7z
+*.zip
+*.tar
+*.gz
+*.xz
+
 # html
 *.html
 
