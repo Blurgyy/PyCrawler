@@ -10,22 +10,23 @@ from globalfunctions import *
 
 #### Global
 class crawler:
-    def __init__(self, ):
+    def __init__(self, _dl_option = None):
         try:
             self.base_url = ["https://91mjw.com/", "http://v.mtyee.com/", ];
             self.s_url = [];
             self.s_url.append(self.base_url[0] + "?s=");
             self.s_url.append(self.base_url[1] + "sssv.php?top=10&q=")
             self.series = [];
+            self.dl_option = _dl_option;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::crawler::__init__(): %s\033[0m", e);
+            print("\033[1;31mcrawl.py::crawler::__init__(): %s\033[0m", e);
 
-    def search(self, term = "", ):
+    def search(self, term = None, ):
         try:
-            while(len(term) == 0):
+            while(term == None or len(term) == 0):
                 print("input search terms: ", end = "");
                 term = input().strip();
             self.series = [];
@@ -35,7 +36,7 @@ class crawler:
                 search_results_raw = re.findall(r'(m-movies.*?</article></div>)', content, flags = re.S)[0];
                 series_metadata_raw = re.findall(r'(<article class="u-movie">.*?</article>)', search_results_raw);
                 for htmltext in series_metadata_raw:
-                    x = tvseries(htmltext);
+                    x = tvseries(htmltext, _dl_option = self.dl_option);
                     if(x.sname != None):
                         self.series.append(x);
             except KeyboardInterrupt:
@@ -50,7 +51,7 @@ class crawler:
                 content = get_content(targ_url, headers = {'Origin': "http://www.fjisu.com"});
                 series_metadata_raw = re.findall(r'(\{.*?\})', content, flags = re.S);
                 for jsontext in series_metadata_raw:
-                    x = tvseries(jsontext = jsontext);
+                    x = tvseries(jsontext = jsontext, _dl_option = self.dl_option);
                     if(x.sname != None):
                         self.series.append(x);
                 if(len(self.series) == 0):
@@ -65,7 +66,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::crawler::search(): %s\033[0m" % e);
+            print("\033[1;31mcrawl.py::crawler::search(): %s\033[0m" % e);
             return None;
 
     def select(self, ):
@@ -111,7 +112,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::crawler::select(): %s\033[0m" % e);
+            print("\033[1;31mcrawl.py::crawler::select(): %s\033[0m" % e);
             return None;
 
     def Download(self, Id = None):
@@ -128,7 +129,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::crawler::Download(): %s\033[0m" % e);
+            print("\033[1;31mcrawl.py::crawler::Download(): %s\033[0m" % e);
 
 
 if(__name__ == "__main__"):

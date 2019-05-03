@@ -6,18 +6,19 @@ import re
 import os
 import time
 import random
+import shutil
 from episode import episode
 from globalfunctions import *
 
 #### Series
 class tvseries:
-    def __init__(self, htmltext = None, jsontext = None):
+    def __init__(self, htmltext = None, jsontext = None, _dl_option = None):
         try:
             self.sname = None;
             self.base_url = None;
             self._hash = None;
             self.episodes = [];
-            self.dl_option = "";
+            self.dl_option = _dl_option;
             if(htmltext != None):
                 self.parse_html(htmltext);
             elif(jsontext != None):
@@ -28,7 +29,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::tvseries::__init__(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::__init__(): %s\033[0m" % e);
 
     def parse_html(self, htmltext, ):
         try:
@@ -39,7 +40,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::tvseries::parse_html(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::parse_html(): %s\033[0m" % e);
 
     def parse_json(self, jsontext, ):
         try:
@@ -52,9 +53,9 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::tvseries::parse_json(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::parse_json(): %s\033[0m" % e);
 
-    def process(self, ):
+    def process(self, ):    # returns True if one or more download actions need to be performed, False otherwise
         try:
             ret = False;
             self.episodes = [];
@@ -62,7 +63,17 @@ class tvseries:
             if(split_host(self.base_url) == "https://91mjw.com"):
                 all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S)[1];
                 single_episodes_raw = re.findall(r'<a.*?href="(.*?)">(.*?)</a>', all_episodes_raw);
-                print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
+                # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
+                if(self.dl_option == 'd'):
+                    if(os.path.exists(self.sname)):
+                        print("ok deleting folder: [%s]" % (self.sname));
+                        shutil.rmtree(self.sname);
+                    else:
+                        print("no such folder as [%s], abort" % (self.sname));
+                    return ret;
+                else:
+                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                    print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
                     self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epid = (single_episode[1].strip()), _from_series = self));
                     ret = True;
@@ -90,8 +101,16 @@ class tvseries:
                     _m3u8_url += tmp_m3u8_url;
                     # print("ITERING: tmp_m3u8_url = %s" % tmp_m3u8_url);
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
-                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                print("%d video(s) will be downloaded" % (len(_m3u8_url)));
+                if(self.dl_option == 'd'):
+                    if(os.path.exists(self.sname)):
+                        print("ok deleting folder: [%s]" % (self.sname));
+                        shutil.rmtree(self.sname);
+                    else:
+                        print("no such folder as [%s], abort" % (self.sname));
+                    return ret;
+                else:
+                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                    print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
                     # print(m3u8_url);
                     current_episode = None;
@@ -117,19 +136,30 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::tvseries::process(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::process(): %s\033[0m" % e);
             return ret;
 
     def Download(self, ):
         try:
+            current_dlcnt = [0];
+            maximum_dlcnt = 8;  # allows at most 8 downloads simultaneously
+            th_supervisor_list = [];
             for ep in self.episodes:
-                if(ep.Download()):  # Download performed normaly
-                    time.sleep(random.randint(1, 3));
-                else:
-                    continue;
+                th = myThread(target = ep.Download, );
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, maximum_dlcnt));
+                th_supervisor_list.append(th_supervisor);
+                th.start();
+                th_supervisor.start();
+                time.sleep(0.05);
+                # if(ep.Download()):  # Download performed normaly
+                #     time.sleep(random.randint(1, 3));
+                # else:
+                #     continue;
+            for th_supervisor in th_supervisor_list:
+                th_supervisor.join();
             print("\033[1;42;37mall pending downloads have been done, exiting\033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisodes.py::tvseries::Download(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::Download(): %s\033[0m" % e);

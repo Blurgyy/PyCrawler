@@ -1,7 +1,11 @@
 #!/usr/bin/python
 
 import crawl
+from globalfunctions import *
 
-x = crawl.crawler();
+
+shell_args = read_shell_args();
+
+x = crawl.crawler(_dl_option = shell_args['_dl_option']);
 x.search();
 x.Download();
