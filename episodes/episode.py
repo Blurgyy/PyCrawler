@@ -5,8 +5,7 @@ __author__ = "Blurgy";
 import re
 import os
 import shutil
-import sys
-import select
+import time
 from globalfunctions import *
 
 
@@ -18,6 +17,7 @@ class episode:
             self.base_url = _base_url;
             self.epid = _epid;
             self.from_series = _from_series;
+            self.fname = self.from_series.sname + '/' + str(self.epid) + ".m3u8";
             self._hash = HASH;
             self.m3u8_url = _m3u8_url;
             self.tvid = None;
@@ -111,29 +111,28 @@ class episode:
             #     print("ok deleting folder [%s]" % (self.from_series.sname));
             #     shutil.rmtree(self.from_series.sname);
             #     return False;
-            fname = self.from_series.sname + '/' + str(self.epid) + ".m3u8";
-            if(os.path.exists(fname)):
+            if(os.path.exists(self.fname)):
                 if(self.dl_option == 'n'):
-                    print("[%s] duplicated, " % (fname), end = "");
+                    print("[%s] duplicated, " % (self.fname), end = "");
                     duplicate_id = 2;
-                    fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
-                    while(os.path.exists(fname)):
+                    self.fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
+                    while(os.path.exists(self.fname)):
                         duplicate_id += 1;
-                        fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
-                    print("downloading as [%s]" % (fname));
+                        self.fname = self.from_series.sname + '/' + str(self.epid) + "(%d).m3u8" % (duplicate_id);
+                    print("downloading as [%s]" % (self.fname));
                 elif(self.dl_option == 'o'):
-                    print("[%s] duplicated, overwriting" % (fname));
+                    print("[%s] duplicated, overwriting" % (self.fname));
                     # do_nothing();
                 elif(self.dl_option == 's'):
-                    print("[%s] duplicated, skipping" % (fname));
+                    print("[%s] duplicated, skipping" % (self.fname));
                     return False;
-            with open(fname, 'w') as f:
+            with open(self.fname, 'w') as f:
                 do_nothing();
             if(self.m3u8_unify()):
                 # print(self.m3u8);
-                with open(fname, 'w') as f:
+                with open(self.fname, 'w') as f:
                     f.write(self.m3u8);
-                print("\033[1m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epid), fname));
+                print("\033[1m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epid), self.fname));
                 return False;
             else:
                 return False;
@@ -142,4 +141,18 @@ class episode:
             exit();
         except Exception as e:
             print("\033[1;31mepisode.py::episode::Download(): %s\033[0m" % e);
+            return True;
+
+    def renew_mtime(self, ):    # renew file's last modified time (if the file exists) to current time
+        try:
+            if(os.path.exists(self.fname)):
+                os.utime(self.fname);
+                time.sleep(0.05);
+            else:
+                do_nothing();
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("\033[1;31mepisode.py::episode::renew_mtime(): %s\033[0m" % e);
             return True;

@@ -58,22 +58,21 @@ class tvseries:
     def process(self, ):    # returns True if one or more download actions need to be performed, False otherwise
         try:
             ret = False;
+            if(self.dl_option == 'd'):
+                if(os.path.exists(self.sname)):
+                    shutil.rmtree(self.sname);
+                    print("\033[1;37;43mok deleted folder: [%s]\033[0m" % (self.sname));
+                else:
+                    print("no such folder as [%s], file structure unchanged" % (self.sname));
+                return ret;
             self.episodes = [];
             content = get_content(self.base_url);
             if(split_host(self.base_url) == "https://91mjw.com"):
                 all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S)[1];
                 single_episodes_raw = re.findall(r'<a.*?href="(.*?)">(.*?)</a>', all_episodes_raw);
                 # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
-                if(self.dl_option == 'd'):
-                    if(os.path.exists(self.sname)):
-                        print("ok deleting folder: [%s]" % (self.sname));
-                        shutil.rmtree(self.sname);
-                    else:
-                        print("no such folder as [%s], abort" % (self.sname));
-                    return ret;
-                else:
-                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                    print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
+                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
                     self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epid = (single_episode[1].strip()), _from_series = self));
                     ret = True;
@@ -157,6 +156,9 @@ class tvseries:
                 #     continue;
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
+            print("\033[1;37;43mrenewing modify time for downloaded items...\033[0m", end = "\r");
+            for ep in self.episodes:
+                ep.renew_mtime();
             print("\033[1;42;37mall pending downloads have been done, exiting\033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
