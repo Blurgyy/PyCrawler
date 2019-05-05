@@ -100,16 +100,8 @@ class tvseries:
                     _m3u8_url += tmp_m3u8_url;
                     # print("ITERING: tmp_m3u8_url = %s" % tmp_m3u8_url);
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
-                if(self.dl_option == 'd'):
-                    if(os.path.exists(self.sname)):
-                        print("ok deleting folder: [%s]" % (self.sname));
-                        shutil.rmtree(self.sname);
-                    else:
-                        print("no such folder as [%s], abort" % (self.sname));
-                    return ret;
-                else:
-                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                    print("%d video(s) will be downloaded" % (len(_m3u8_url)));
+                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
                     # print(m3u8_url);
                     current_episode = None;

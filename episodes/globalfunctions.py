@@ -27,7 +27,7 @@ def supervisor(th, current_dlcnt, maximum_dlcnt):
     current_dlcnt[0] += 1;
     th.join();
     current_dlcnt[0] -= 1;
-def read_shell_args():
+def read_terminal_args():
     ret = {
         '_dl_option': 's',
     };

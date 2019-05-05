@@ -4,8 +4,8 @@ import crawl
 from globalfunctions import *
 
 
-shell_args = read_shell_args();
+terminal_args = read_terminal_args();
 
-x = crawl.crawler(_dl_option = shell_args['_dl_option']);
+x = crawl.crawler(_dl_option = terminal_args['_dl_option']);
 x.search();
 x.Download();
