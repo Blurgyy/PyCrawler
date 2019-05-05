@@ -1,11 +1,9 @@
 #!/usr/bin/python
 
-import crawl
-from globalfunctions import *
+import epi
 
+terminal_args = epi.read_terminal_args();
 
-terminal_args = read_terminal_args();
-
-x = crawl.crawler(_dl_option = terminal_args['_dl_option']);
+x = epi.crawler(_dl_option = terminal_args['_dl_option']);
 x.search();
 x.Download();

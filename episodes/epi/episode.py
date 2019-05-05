@@ -6,7 +6,7 @@ import re
 import os
 import shutil
 import time
-from globalfunctions import *
+from .globalfunctions import *
 
 
 #### class episode

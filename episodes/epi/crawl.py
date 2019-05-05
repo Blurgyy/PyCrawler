@@ -4,8 +4,8 @@ __author__ = "Blurgy";
 
 import re
 from urllib.parse import quote
-from tvseries import tvseries
-from globalfunctions import *
+from .tvseries import tvseries
+from .globalfunctions import *
 
 
 #### Global

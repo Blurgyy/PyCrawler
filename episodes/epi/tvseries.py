@@ -7,8 +7,8 @@ import os
 import time
 import random
 import shutil
-from episode import episode
-from globalfunctions import *
+from .episode import episode
+from .globalfunctions import *
 
 #### Series
 class tvseries:
