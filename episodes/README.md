@@ -31,7 +31,7 @@ import epi
     
     - `-o` 覆盖文件名重复的文件
     
-        - [`globalfunctions.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/globalfunctions.py) 中，函数 `read_terminal_args()` 返回一个字典，作为crawl的参数，具体用法见 [`test.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/test.py) . 例：
+        - [`globalfunctions.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/globalfunctions.py) 中，函数 `read_terminal_args()` 返回一个字典，作为crawl的参数，具体用法见 [`test.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/test.py) . 例：
     
         - ```bash
           ./test.py -d
