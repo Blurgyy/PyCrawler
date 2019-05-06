@@ -25,21 +25,39 @@ def supervisor(th, current_dlcnt, maximum_dlcnt):
     while(current_dlcnt[0] >= maximum_dlcnt):
         pass;
     current_dlcnt[0] += 1;
+    # print("downloading %d items.." % current_dlcnt[0]);
     th.join();
     current_dlcnt[0] -= 1;
 def read_terminal_args():
     ret = {
         '_dl_option': 's',
+        '_maximum_dlcnt': 8,
+        '_ifpath': None,
+        '_ofpath': None
     };
     if(len(sys.argv) == 1):
         return ret;
     for i in range(1, len(sys.argv)):
-        if(sys.argv[i] == "-d"):    # `-d` (d)elete folder
+        if(sys.argv[i] == '-c'):    # `-c <n>` download $n items simultaneously
+            i += 1;
+            _maximum_dlcnt = 8;
+            if(sys.argv[i].isdigit()):
+                _maximum_dlcnt = int(sys.argv[i]);
+                if(_maximum_dlcnt == 0):
+                    _maximum_dlcnt = 8;
+            ret['_maximum_dlcnt'] = int(sys.argv[i]);
+        elif(sys.argv[i] == "-d"):  # `-d` (d)elete folder
             ret['_dl_option'] = 'd';
         elif(sys.argv[i] == "-n"):  # `-n` save with a (n)ew name
             ret['_dl_option'] = 'n';
         elif(sys.argv[i] == '-o'):  # `-o` (o)verwrite
             ret['_dl_option'] = 'o';
+        elif(sys.argv[i] == '-r'):
+            i += 1;
+            ret['_ifpath'] = sys.argv[i];
+        elif(sys.argv[i] == '-w'):
+            i += 1;
+            ret['_ofpath'] = sys.argv[i];
     return ret;
 def create_headers():
     try:

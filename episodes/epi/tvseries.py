@@ -12,13 +12,15 @@ from .globalfunctions import *
 
 #### Series
 class tvseries:
-    def __init__(self, htmltext = None, jsontext = None, _dl_option = None):
+    def __init__(self, htmltext = None, jsontext = None, _dl_option = None, _maximum_dlcnt = 8, ):
         try:
+            # print("initializing class 'tvseries' with (_dl_option = %s, _maximum_dlcnt = %s)" % (_dl_option, _maximum_dlcnt));
             self.sname = None;
             self.base_url = None;
             self._hash = None;
             self.episodes = [];
             self.dl_option = _dl_option;
+            self.maximum_dlcnt = _maximum_dlcnt;
             if(htmltext != None):
                 self.parse_html(htmltext);
             elif(jsontext != None):
@@ -76,7 +78,11 @@ class tvseries:
                 print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
                 # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
-                    self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epname = (single_episode[1].strip()), _from_series = self));
+                    self.episodes.append(episode(\
+                        _base_url = self.base_url + single_episode[0],\
+                        _epname = (single_episode[1].strip()),\
+                        _from_series = self\
+                        ));
                     ret = True;
                 return ret;
             elif(split_host(self.base_url) == "http://www.fjisu.com"):
@@ -119,7 +125,13 @@ class tvseries:
                                 break;
                         if(current_episode == None):
                             current_episode = ["tvseries::processing_generated", episode_id];
-                    self.episodes.append(episode(_base_url = self.base_url + current_episode[0], _epname = (current_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = m3u8_url[0]));
+                    self.episodes.append(episode(\
+                        _base_url = self.base_url + current_episode[0],\
+                        _epname = (current_episode[1].strip()),\
+                        _from_series = self,\
+                        HASH = self._hash,\
+                        _m3u8_url = m3u8_url[0]\
+                        ));
                     ret = True;
                 return ret;
             else:
@@ -135,11 +147,11 @@ class tvseries:
     def download(self, ):
         try:
             current_dlcnt = [0];
-            maximum_dlcnt = 8;  # allows at most 8 downloads simultaneously
+            # maximum_dlcnt = 8;  # allows at most 8 downloads simultaneously
             th_supervisor_list = [];
             for ep in self.episodes:
                 th = myThread(target = ep.download, );
-                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, maximum_dlcnt));
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, self.maximum_dlcnt));
                 th_supervisor_list.append(th_supervisor);
                 th.start();
                 th_supervisor.start();
