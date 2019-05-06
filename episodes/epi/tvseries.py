@@ -68,13 +68,15 @@ class tvseries:
             self.episodes = [];
             content = get_content(self.base_url);
             if(split_host(self.base_url) == "https://91mjw.com"):
-                all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S)[1];
-                single_episodes_raw = re.findall(r'<a.*?href="(.*?)">(.*?)</a>', all_episodes_raw);
+                all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S);
+                single_episodes_raw = [];
+                for x in all_episodes_raw:
+                    single_episodes_raw += re.findall(r'<a.*?href="(.*?)">(.*?)</a>', x);
                 # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
                 print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
+                # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
-                    self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epid = (single_episode[1].strip()), _from_series = self));
+                    self.episodes.append(episode(_base_url = self.base_url + single_episode[0], _epname = (single_episode[1].strip()), _from_series = self));
                     ret = True;
                 return ret;
             elif(split_host(self.base_url) == "http://www.fjisu.com"):
@@ -110,14 +112,14 @@ class tvseries:
                         current_episode = single_episodes_raw[episode_id-1];
                     else:
                         episode_id = m3u8_url[-1].replace('%', '\\');
-                        episode_id = episode_id.encode('latin-1').decode('unicode-escape');
+                        episode_id = episode_id.encode('latin-1').decode('unicode-escape').strip();
                         for x in single_episodes_raw:
                             if(x[1].strip() == episode_id):
                                 current_episode = x;
                                 break;
                         if(current_episode == None):
                             current_episode = ["tvseries::processing_generated", episode_id];
-                    self.episodes.append(episode(_base_url = self.base_url + current_episode[0], _epid = (current_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = m3u8_url[0]));
+                    self.episodes.append(episode(_base_url = self.base_url + current_episode[0], _epname = (current_episode[1].strip()), _from_series = self, HASH = self._hash, _m3u8_url = m3u8_url[0]));
                     ret = True;
                 return ret;
             else:
@@ -130,30 +132,33 @@ class tvseries:
             print("\033[1;31mtvseries.py::tvseries::process(): %s\033[0m" % e);
             return ret;
 
-    def Download(self, ):
+    def download(self, ):
         try:
             current_dlcnt = [0];
             maximum_dlcnt = 8;  # allows at most 8 downloads simultaneously
             th_supervisor_list = [];
             for ep in self.episodes:
-                th = myThread(target = ep.Download, );
+                th = myThread(target = ep.download, );
                 th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, maximum_dlcnt));
                 th_supervisor_list.append(th_supervisor);
                 th.start();
                 th_supervisor.start();
                 time.sleep(0.05);
-                # if(ep.Download()):  # Download performed normaly
+                # if(ep.download()):  # download performed normaly
                 #     time.sleep(random.randint(1, 3));
                 # else:
                 #     continue;
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
-            print("\033[1;37;43mrenewing modify time for downloaded items...\033[0m", end = "\r");
-            for ep in self.episodes:
-                ep.renew_mtime();
+            if(os.listdir(self.sname)):
+                print("\033[1;37;43mrenewing modify time for downloaded items...\033[0m", end = "\r");
+                for ep in self.episodes:
+                    ep.renew_mtime();
+            else:
+                os.rmdir(self.sname);
             print("\033[1;42;37mall pending downloads have been done, exiting\033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::Download(): %s\033[0m" % e);
+            print("\033[1;31mtvseries.py::tvseries::download(): %s\033[0m" % e);

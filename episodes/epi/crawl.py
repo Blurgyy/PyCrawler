@@ -115,21 +115,21 @@ class crawler:
             print("\033[1;31mcrawl.py::crawler::select(): %s\033[0m" % e);
             return None;
 
-    def Download(self, Id = None):
+    def download(self, Id = None):
         try:
             if(Id == None):
                 Id = self.select();
             if(Id != None):
                 for i in Id:
                     if(self.series[i].process()):
-                        self.series[i].Download();
+                        self.series[i].download();
                     else:
                         continue;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::Download(): %s\033[0m" % e);
+            print("\033[1;31mcrawl.py::crawler::download(): %s\033[0m" % e);
 
 
 if(__name__ == "__main__"):
@@ -137,7 +137,7 @@ if(__name__ == "__main__"):
         # print(is_url(input()));
         x = crawler();
         x.search("game of thrones");
-        x.Download();
+        x.download();
     except KeyboardInterrupt:
         print("\n KeyboardInterrupt, exiting");
         exit();
