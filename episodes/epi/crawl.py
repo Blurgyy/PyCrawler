@@ -77,14 +77,17 @@ class crawler:
     def read_search_term_from_file(self, ):
         try:
             ret = None;
-            with open(self.ifpath) as f:
-                ret = f.read().strip();
-            if(len(ret) > 30):
-                print("file too large");
-                x = ret;
-                ret = "";
-                for ch in x:
-                    ret += ch;
+            if(self.ifpath and os.path.exists(self.ifpath)):
+                with open(self.ifpath) as f:
+                    ret = f.read().strip();
+                if(len(ret) > 30):
+                    # print("file too large");
+                    x = ret;
+                    ret = "";
+                    for i in range(30):
+                        ret += x[i];
+            else:
+                do_nothing();
             return ret;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
