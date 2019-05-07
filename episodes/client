@@ -1,0 +1,33 @@
+#!/usr/bin/python
+
+import epi
+
+args = epi.read_terminal_args();    # read args from terminal 
+
+# print(args);
+dl_option = args['_dl_option'];
+maximum_dlcnt = args['_maximum_dlcnt'];
+ifpath = args['_ifpath'];
+ofpath = args['_ofpath'];
+fdump_path = args['_fdump_path'];
+fload_path = args['_fload_path'];
+dump = not not fdump_path;
+load = not not fload_path;
+preselect = args['_preselect'];
+
+x = epi.crawler(\
+    _dl_option = dl_option,\
+    _maximum_dlcnt = maximum_dlcnt,\
+    _ifpath = ifpath,\
+    _ofpath = ofpath,\
+    _fdump_path = fdump_path,\
+    _fload_path = fload_path,\
+    _preselect = preselect\
+    );
+
+x.run(dump = dump, load = load, );
+
+
+# x.search();
+# x.download();
+# x.close();

@@ -4,6 +4,7 @@ __author__ = "Blurgy";
 
 import re
 import os
+import pickle
 from urllib.parse import quote
 from .tvseries import tvseries
 from .globalfunctions import *
@@ -11,15 +12,18 @@ from .globalfunctions import *
 
 #### Global
 class crawler:
-    def __init__(self, _dl_option = None, _maximum_dlcnt = 8, _ifpath = None, _ofpath = None):
+    def __init__(self, _dl_option = None, _maximum_dlcnt = 8, _fdump_path = None, _fload_path = None, _ifpath = None, _ofpath = None, _preselect = None):
         try:
             self.base_url = ["https://91mjw.com/", "http://v.mtyee.com/", ];
             self.s_url = [];
             self.s_url.append(self.base_url[0] + "?s=");
             self.s_url.append(self.base_url[1] + "sssv.php?top=10&q=")
             self.series = [];
+            self.Id = _preselect;
             self.dl_option = _dl_option;
             self.maximum_dlcnt = _maximum_dlcnt;
+            self.fdump_path = _fdump_path;
+            self.fload_path = _fload_path;
             self.ifpath = _ifpath;
             self.ofpath = _ofpath;
         except KeyboardInterrupt:
@@ -27,6 +31,37 @@ class crawler:
             exit();
         except Exception as e:
             print("\033[1;31mcrawl.py::crawler::__init__(): %s\033[0m", e);
+
+    def run(self, dump = False, load = False):
+        try:
+            # do_nothing();
+            if(load and os.path.exists(self.fload_path)):
+                tmp_fdump_path = self.fdump_path;
+                tmp_fload_path = self.fload_path;
+                with open(self.fload_path, 'rb') as f:
+                    self = pickle.load(f);
+                self.fload_path = tmp_fload_path;
+                self.fdump_path = tmp_fdump_path;
+            else:
+                self.search();
+            if(dump):
+                while(self.fdump_path and os.path.exists(self.fdump_path)):
+                    if(self.fdump_path):
+                        print("[%s] is occupied, enter another path: " % (self.fdump_path), end = "");
+                    else:
+                        print("enter another path: ", end = "");
+                    self.fdump_path = input().strip();
+                with open(self.fdump_path, 'wb') as f:
+                    pickle.dump(self, f);
+            else:
+                self.select();
+                self.download();
+            self.close();
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("\033[1;31mcrawl.py::crawler::run(): %s\033[0m", e);
 
     def search(self, search_term = None, ):
         try:
@@ -101,6 +136,8 @@ class crawler:
             if(len(self.series) == 0):
                 print("nothing to select, abort");
                 return None;
+            if(self.Id):
+                return self.Id;
             print("Search Results(\033[1m%d\033[0m):" % len(self.series));
             for i in range(len(self.series)):
                 print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
@@ -120,6 +157,7 @@ class crawler:
                         ret = [];
                         for iid in range(len(self.series)):
                             ret.append(iid);
+                        self.Id = ret;
                         return ret;
                     elif(re.match(r'!+', i)):
                         print("signal captured, abort");
@@ -135,6 +173,7 @@ class crawler:
                     entryid = "";
                 else:
                     print();
+                    self.Id = ret;
                     return ret;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -146,8 +185,11 @@ class crawler:
     def output_select_list(self, ):
         try:
             if(self.ofpath):
-                while(len(self.ofpath) == 0 or os.path.exists(self.ofpath)):
-                    print("[%s] is occupied, enter another path: " % (self.ofpath), end = "");
+                while(self.ofpath or os.path.exists(self.ofpath)):
+                    if(self.ofpath):
+                        print("[%s] is occupied, enter another path: " % (self.ofpath), end = "");
+                    else:
+                        print("enter another path: ", end = "");
                     self.ofpath = input().strip();
                     if(self.ofpath[0] == '$'):
                         self.ofpath = self.ofpath.strip(' \n$');
@@ -164,12 +206,14 @@ class crawler:
             print("\033[1;31mcrawl.py::crawler::output_select_list(): %s\033[0m" % e);
             return None;
 
-    def download(self, Id = None):
+    def download(self, ):
         try:
-            if(Id == None):
-                Id = self.select();
-            if(Id != None):
-                for i in Id:
+            if(self.Id == None):
+                self.select();
+            if(isinstance(self.Id, int)):
+                self.Id = [self.Id];
+            if(self.Id != None):
+                for i in self.Id:
                     if(self.series[i].process()):
                         self.series[i].download();
                     else:

@@ -29,36 +29,62 @@ def supervisor(th, current_dlcnt, maximum_dlcnt):
     th.join();
     current_dlcnt[0] -= 1;
 def read_terminal_args():
-    ret = {
-        '_dl_option': 's',
-        '_maximum_dlcnt': 8,
-        '_ifpath': None,
-        '_ofpath': None
-    };
-    if(len(sys.argv) == 1):
+    try:
+        default = {
+            '_dl_option': 's',
+            '_maximum_dlcnt': 8,
+            '_fdump_path': None,
+            '_fload_path': None,
+            '_ifpath': None,
+            '_ofpath': None,
+            '_preselect': None
+        };
+        ret = default;
+        if(len(sys.argv) == 1):
+            return ret;
+        for i in range(1, len(sys.argv)):
+            if(sys.argv[i] == '-c'):    # `-c <n>` download $n items simultaneously
+                i += 1;
+                _maximum_dlcnt = 8;
+                if(sys.argv[i].isdigit()):
+                    _maximum_dlcnt = int(sys.argv[i]);
+                    if(_maximum_dlcnt == 0):
+                        _maximum_dlcnt = 8;
+                ret['_maximum_dlcnt'] = _maximum_dlcnt;
+            elif(sys.argv[i] == "-d"):  # `-d` (d)elete folder
+                ret['_dl_option'] = 'd';
+            elif(sys.argv[i] == '-m'):  # `-m <n>` preselect download items
+                i += 1;
+                _preselect = 1;         # preselect the first item by default
+                if(sys.argv[i].isdigit()):
+                    _preselect = int(sys.argv[i]);
+                ret['_preselect'] = _preselect - 1;
+                if(ret['_preselect'] < 0):
+                    ret['_preselect'] = None;
+            elif(sys.argv[i] == "-n"):  # `-n` save with a (n)ew name
+                ret['_dl_option'] = 'n';
+            elif(sys.argv[i] == '-o'):  # `-o` (o)verwrite
+                ret['_dl_option'] = 'o';
+            elif(sys.argv[i] == '-r'):
+                i += 1;
+                ret['_ifpath'] = sys.argv[i];
+            elif(sys.argv[i] == '-w'):
+                i += 1;
+                ret['_ofpath'] = sys.argv[i];
+            elif(sys.argv[i] == '-dump'):
+                i += 1;
+                ret['_fdump_path'] = sys.argv[i];
+            elif(sys.argv[i] == '-load'):
+                i += 1;
+                ret['_fload_path'] = sys.argv[i];
+        # print(ret);
         return ret;
-    for i in range(1, len(sys.argv)):
-        if(sys.argv[i] == '-c'):    # `-c <n>` download $n items simultaneously
-            i += 1;
-            _maximum_dlcnt = 8;
-            if(sys.argv[i].isdigit()):
-                _maximum_dlcnt = int(sys.argv[i]);
-                if(_maximum_dlcnt == 0):
-                    _maximum_dlcnt = 8;
-            ret['_maximum_dlcnt'] = int(sys.argv[i]);
-        elif(sys.argv[i] == "-d"):  # `-d` (d)elete folder
-            ret['_dl_option'] = 'd';
-        elif(sys.argv[i] == "-n"):  # `-n` save with a (n)ew name
-            ret['_dl_option'] = 'n';
-        elif(sys.argv[i] == '-o'):  # `-o` (o)verwrite
-            ret['_dl_option'] = 'o';
-        elif(sys.argv[i] == '-r'):
-            i += 1;
-            ret['_ifpath'] = sys.argv[i];
-        elif(sys.argv[i] == '-w'):
-            i += 1;
-            ret['_ofpath'] = sys.argv[i];
-    return ret;
+    except KeyboardInterrupt:
+        print("\n KeyboardInterrupt, exiting");
+        exit();
+    except Exception as e:
+        print("\033[1;31mglobalfunctions.py::read_terminal_args(): %s\033[0m" % e);
+        return default;
 def create_headers():
     try:
         ip = socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))

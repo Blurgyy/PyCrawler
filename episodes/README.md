@@ -9,7 +9,7 @@
 
 ## Usage
 
-- 用法： (详见 [`test.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/test.py))
+- 用法： (详见 [`client`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/client))
 
 ```python
 import epi
@@ -21,16 +21,19 @@ import epi
     - 输入 `*` 以全选
 
 - 命令行参数（只接受第一个参数）
+    - `-c <n>` 设置最大同时下载数为 `$n` ，默认最大同时下载数为 `8` 
     - `-d` 删除文件夹
+    - `-m <n>` 选择第 `$n` 项搜索结果为下载项 (此时不从键盘读取选择下载项内容，与 `-r` 或 `-load` 配合使用，仅接受一个整数，不可全选)
     - `-n` 以新的文件名保存
-    - `-s` 跳过 （默认）
     - `-o` 覆盖文件名重复的文件
-    - `-c <n>` 设置最大同时下载数为 `n` ，默认最大同时下载数为 `8` 
     - `-r <filepath>` 将文件 `$filepath` 中的内容作为的 `search term` （仅读取前 `30` 个字符， `-r` 启用时不从键盘读取搜索内容） 
+    - `-s` 跳过 （默认）
     - `-w <filepath>` 将选择下载项时的 list 输出到文件 `$filepath` 
-        - [`globalfunctions.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/globalfunctions.py) 中，函数 `read_terminal_args()` 返回一个字典，作为crawl的参数，具体用法见 [`test.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/test.py). 例：
+    - `-load <filepath>` 读取 `$filepath` 文件为一个 `crawler` 对象 (此时不从键盘读取搜索内容) 
+    - `-dump <filepath>` 搜索结束后，将自身存为 `$filepath` (存为二进制文件，可以使用 `-load` 重新读取，此时没有 `选择下载项` 和 `下载` 过程) 并结束
+        - [`globalfunctions.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/globalfunctions.py) 中，函数 `read_terminal_args()` 返回一个字典，作为crawl的参数，具体用法见 [`client`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/client). 例：
         - ```bash
-          ./test.py -n \
+          python3.6 client -n \
           -c 16 \
           -r input_filepath \
           -w output_filepath 
