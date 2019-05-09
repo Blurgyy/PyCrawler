@@ -168,7 +168,7 @@ class tvseries:
                     ep.renew_mtime();
             else:
                 os.rmdir(self.sname);
-            print("\033[1;32mall pending downloads have been done\033[0m");
+            print("\033[1;32mall pending downloads have been done         \033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
