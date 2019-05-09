@@ -56,7 +56,7 @@ class crawler:
             else:
                 self.select();
                 self.download();
-            self.close();
+            # self.close();
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -95,7 +95,7 @@ class crawler:
                     if(x.sname != None):
                         self.series.append(x);
                 if(len(self.series) == 0):
-                    print("No TVseries Found about %s" % str(search_term));
+                    print("no TVseries found about \"%s\"" % str(search_term));
             except KeyboardInterrupt:
                 print("\n KeyboardInterrupt, exiting");
                 exit();
@@ -112,15 +112,17 @@ class crawler:
     def read_search_term_from_file(self, ):
         try:
             ret = None;
-            if(self.ifpath and os.path.exists(self.ifpath)):
-                with open(self.ifpath) as f:
-                    ret = f.read().strip();
-                if(len(ret) > 30):
-                    # print("file too large");
-                    x = ret;
-                    ret = "";
-                    for i in range(30):
-                        ret += x[i];
+            if(self.ifpath):
+                if(os.path.exists(self.ifpath)):
+                    with open(self.ifpath) as f:
+                        ret = f.read().strip().split('\n')[0];
+                    if(len(ret) > 30):
+                        x = ret;
+                        ret = "";
+                        for i in range(30):
+                            ret += x[i];
+                else:
+                    print("[%s]: file not found" % (self.ifpath));
             else:
                 do_nothing();
             return ret;
@@ -133,18 +135,19 @@ class crawler:
 
     def select(self, ):
         try:
+            ret = [];
             if(len(self.series) == 0):
                 print("nothing to select, abort");
-                return None;
+                self.Id = ret;
+                return ret;
             if(self.Id):
                 return self.Id;
             print("Search Results(\033[1m%d\033[0m):" % len(self.series));
             for i in range(len(self.series)):
                 print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
-            self.output_select_list();
+            self.write_select_list();
             # print("\nselect by entering the id of the desired TVseries (enter ! to abort): ", end = "");
             entryid = "";
-            ret = [];
             while(len(entryid) == 0):
                 print("select by entering the id of the desired TVseries (enter \033[1;34m!\033[0m to abort): ", end = "");
                 entryid = input().strip();
@@ -161,7 +164,9 @@ class crawler:
                         return ret;
                     elif(re.match(r'!+', i)):
                         print("signal captured, abort");
-                        return None;
+                        ret = [];
+                        self.Id = ret;
+                        return ret;
                     elif(re.search(r'[\D]', i) or int(i) < 1 or int(i) > len(self.series)):
                         continue;
                         # print("invalid input, please re-enter: ", end = "");
@@ -182,10 +187,10 @@ class crawler:
             print("\033[1;31mcrawl.py::crawler::select(): %s\033[0m" % e);
             return None;
 
-    def output_select_list(self, ):
+    def write_select_list(self, ):
         try:
             if(self.ofpath):
-                while(self.ofpath or os.path.exists(self.ofpath)):
+                while(not self.ofpath or os.path.exists(self.ofpath)):
                     if(self.ofpath):
                         print("[%s] is occupied, enter another path: " % (self.ofpath), end = "");
                     else:
@@ -195,15 +200,19 @@ class crawler:
                         self.ofpath = self.ofpath.strip(' \n$');
                         break;
                 with open(self.ofpath, 'w') as f:
+                    do_nothing();
+                with open(self.ofpath, 'w') as f:
                     for x in self.series:
                         f.write("%s\n" % (x.sname));
+                print("select list written as [%s], exiting" % (self.ofpath));
+                exit();
             else:
                 do_nothing();
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::output_select_list(): %s\033[0m" % e);
+            print("\033[1;31mcrawl.py::crawler::write_select_list(): %s\033[0m" % e);
             return None;
 
     def download(self, ):
@@ -224,17 +233,17 @@ class crawler:
         except Exception as e:
             print("\033[1;31mcrawl.py::crawler::download(): %s\033[0m" % e);
 
-    def close(self, ):
-        try:
-            if(self.ofpath):
-                os.remove(self.ofpath);
-            else:
-                do_nothing();
-        except KeyboardInterrupt:
-            print("\n KeyboardInterrupt, exiting");
-            exit();
-        except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::close(): %s\033[0m" % e);
+    # def close(self, ):
+    #     try:
+    #         if(self.ofpath and os.path.exists(self.ofpath)):
+    #             os.remove(self.ofpath);
+    #         else:
+    #             do_nothing();
+    #     except KeyboardInterrupt:
+    #         print("\n KeyboardInterrupt, exiting");
+    #         exit();
+    #     except Exception as e:
+    #         print("\033[1;31mcrawl.py::crawler::close(): %s\033[0m" % e);
 
 
 if(__name__ == "__main__"):
@@ -243,7 +252,7 @@ if(__name__ == "__main__"):
         x = crawler();
         x.search("game of thrones");
         x.download();
-        x.close();
+        # x.close();
     except KeyboardInterrupt:
         print("\n KeyboardInterrupt, exiting");
         exit();
