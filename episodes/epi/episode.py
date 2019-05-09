@@ -67,7 +67,7 @@ class episode:
                 os.makedirs(self.from_series.sname);
             if(os.path.exists(self.fpath)):
                 if(self.dl_option == 'n'):
-                    print("[%s] duplicated, " % (self.fpath), end = "");
+                    print("-- \033[33m[%s] duplicated, \033[0m" % (self.fpath), end = "");
                     self.duplicate_id += 1;
                     self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                     self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
@@ -75,12 +75,12 @@ class episode:
                         self.duplicate_id += 1;
                         self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                         self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
-                    print("downloading as [%s]" % (self.fpath));
+                    print("\033[33mdownloading as [%s]\033[0m" % (self.fpath));
                 elif(self.dl_option == 'o'):
-                    print("[%s] duplicated, overwriting" % (self.fpath));
+                    print("-- \033[33m[%s] duplicated, overwriting\033[0m" % (self.fpath));
                     do_nothing();
                 elif(self.dl_option == 's'):
-                    print("[%s] duplicated, skipping" % (self.fpath));
+                    print("-- \033[33m[%s] duplicated, skipping\033[0m" % (self.fpath));
                     return False;
             with open(self.fpath, 'w') as f:
                 do_nothing();
@@ -88,7 +88,7 @@ class episode:
                 # print(self.m3u8.content);
                 with open(self.fpath, 'w') as f:
                     f.write(self.m3u8.content);
-                print("\033[1m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
+                print("-- \033[32m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
                 return False;
             else:
                 if(os.path.exists(self.fpath)):

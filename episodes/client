@@ -9,10 +9,10 @@ dl_option = args['_dl_option'];
 maximum_dlcnt = args['_maximum_dlcnt'];
 ifpath = args['_ifpath'];
 ofpath = args['_ofpath'];
-fdump_path = args['_fdump_path'];
-fload_path = args['_fload_path'];
-dump = not not fdump_path;
-load = not not fload_path;
+dumpfpath = args['_dumpfpath'];
+loadfpath = args['_loadfpath'];
+dump = not not dumpfpath;
+load = not not loadfpath;
 preselect = args['_preselect'];
 
 x = epi.crawler(\
@@ -20,8 +20,8 @@ x = epi.crawler(\
     _maximum_dlcnt = maximum_dlcnt,\
     _ifpath = ifpath,\
     _ofpath = ofpath,\
-    _fdump_path = fdump_path,\
-    _fload_path = fload_path,\
+    _dumpfpath = dumpfpath,\
+    _loadfpath = loadfpath,\
     _preselect = preselect\
     );
 

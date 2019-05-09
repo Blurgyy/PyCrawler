@@ -63,7 +63,7 @@ class tvseries:
             if(self.dl_option == 'd'):
                 if(os.path.exists(self.sname)):
                     shutil.rmtree(self.sname);
-                    print("\033[1;37;43mok deleted folder: [%s]\033[0m" % (self.sname));
+                    print("\033[1;33mok deleted folder: [%s]\033[0m" % (self.sname));
                 else:
                     print("no such folder as [%s], file structure unchanged" % (self.sname));
                 return ret;
@@ -163,12 +163,12 @@ class tvseries:
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
             if(os.listdir(self.sname)):
-                print("\033[1;37;43mrenewing modify time for downloaded items...\033[0m", end = "\r");
+                print("\033[1;33mrenewing modify time for downloaded items...\033[0m", end = "\r");
                 for ep in self.episodes:
                     ep.renew_mtime();
             else:
                 os.rmdir(self.sname);
-            print("\033[1;42;37mall pending downloads have been done, exiting\033[0m");
+            print("\033[1;32mall pending downloads have been done, exiting\033[0m");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();

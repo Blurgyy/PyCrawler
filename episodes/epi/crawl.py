@@ -12,7 +12,7 @@ from .globalfunctions import *
 
 #### Global
 class crawler:
-    def __init__(self, _dl_option = None, _maximum_dlcnt = 8, _fdump_path = None, _fload_path = None, _ifpath = None, _ofpath = None, _preselect = None):
+    def __init__(self, _dl_option = None, _maximum_dlcnt = 8, _dumpfpath = None, _loadfpath = None, _ifpath = None, _ofpath = None, _preselect = None):
         try:
             self.base_url = ["https://91mjw.com/", "http://v.mtyee.com/", ];
             self.s_url = [];
@@ -22,8 +22,8 @@ class crawler:
             self.Id = _preselect;
             self.dl_option = _dl_option;
             self.maximum_dlcnt = _maximum_dlcnt;
-            self.fdump_path = _fdump_path;
-            self.fload_path = _fload_path;
+            self.dumpfpath = _dumpfpath;
+            self.loadfpath = _loadfpath;
             self.ifpath = _ifpath;
             self.ofpath = _ofpath;
         except KeyboardInterrupt:
@@ -35,23 +35,29 @@ class crawler:
     def run(self, dump = False, load = False):
         try:
             # do_nothing();
-            if(load and os.path.exists(self.fload_path)):
-                tmp_fdump_path = self.fdump_path;
-                tmp_fload_path = self.fload_path;
-                with open(self.fload_path, 'rb') as f:
-                    self = pickle.load(f);
-                self.fload_path = tmp_fload_path;
-                self.fdump_path = tmp_fdump_path;
+            if(load):
+                if(os.path.exists(self.loadfpath)):
+                    tmp_dumpfpath = self.dumpfpath;
+                    tmp_loadfpath = self.loadfpath;
+                    tmp_Id = self.Id;
+                    with open(self.loadfpath, 'rb') as f:
+                        self = pickle.load(f);
+                    self.loadfpath = tmp_loadfpath;
+                    self.dumpfpath = tmp_dumpfpath;
+                    self.Id = tmp_Id;
+                else:
+                    print("[%s]: dump file not found" % (self.loadfpath));
+                    self.search();
             else:
                 self.search();
             if(dump):
-                while(self.fdump_path and os.path.exists(self.fdump_path)):
-                    if(self.fdump_path):
-                        print("[%s] is occupied, enter another path: " % (self.fdump_path), end = "");
+                while(self.dumpfpath and os.path.exists(self.dumpfpath)):
+                    if(self.dumpfpath):
+                        print("[%s] is occupied, enter another path: " % (self.dumpfpath), end = "");
                     else:
                         print("enter another path: ", end = "");
-                    self.fdump_path = input().strip();
-                with open(self.fdump_path, 'wb') as f:
+                    self.dumpfpath = input().strip();
+                with open(self.dumpfpath, 'wb') as f:
                     pickle.dump(self, f);
             else:
                 self.select();

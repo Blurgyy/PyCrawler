@@ -33,8 +33,8 @@ def read_terminal_args():
         default = {
             '_dl_option': 's',
             '_maximum_dlcnt': 8,
-            '_fdump_path': None,
-            '_fload_path': None,
+            '_dumpfpath': None,
+            '_loadfpath': None,
             '_ifpath': None,
             '_ofpath': None,
             '_preselect': None
@@ -55,12 +55,15 @@ def read_terminal_args():
                 ret['_dl_option'] = 'd';
             elif(sys.argv[i] == '-m'):  # `-m <n>` preselect download items
                 i += 1;
-                _preselect = 1;         # preselect the first item by default
+                _preselect = None;
                 if(sys.argv[i].isdigit()):
-                    _preselect = int(sys.argv[i]);
-                ret['_preselect'] = _preselect - 1;
-                if(ret['_preselect'] < 0):
-                    ret['_preselect'] = None;
+                    _preselect = int(sys.argv[i]) - 1;
+                    if(_preselect < 0):
+                        print("\033[1;31m%s\033[0m: invalid parameter" % (sys.argv[i]));
+                        _preselect = None;
+                else:
+                    print("\033[1;31m%s\033[0m: not a integer" % (sys.argv[i]));
+                ret['_preselect'] = _preselect;
             elif(sys.argv[i] == "-n"):  # `-n` save with a (n)ew name
                 ret['_dl_option'] = 'n';
             elif(sys.argv[i] == '-o'):  # `-o` (o)verwrite
@@ -73,10 +76,10 @@ def read_terminal_args():
                 ret['_ofpath'] = sys.argv[i];
             elif(sys.argv[i] == '-dump'):
                 i += 1;
-                ret['_fdump_path'] = sys.argv[i];
+                ret['_dumpfpath'] = sys.argv[i];
             elif(sys.argv[i] == '-load'):
                 i += 1;
-                ret['_fload_path'] = sys.argv[i];
+                ret['_loadfpath'] = sys.argv[i];
         # print(ret);
         return ret;
     except KeyboardInterrupt:
