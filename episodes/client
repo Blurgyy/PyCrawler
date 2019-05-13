@@ -1,4 +1,6 @@
 #!/usr/bin/python
+#-*- coding:utf-8 -*-
+__author__ = "Blurgy";
 
 import epi
 
@@ -7,22 +9,22 @@ args = epi.read_terminal_args();    # read args from terminal
 # print(args);
 dl_option = args['_dl_option'];
 maximum_dlcnt = args['_maximum_dlcnt'];
-ifpath = args['_ifpath'];
 ofpath = args['_ofpath'];
 dumpfpath = args['_dumpfpath'];
 loadfpath = args['_loadfpath'];
 dump = not not dumpfpath;
 load = not not loadfpath;
 preselect = args['_preselect'];
+search_term = args['_search_term'];
 
 x = epi.crawler(\
     _dl_option = dl_option,\
     _maximum_dlcnt = maximum_dlcnt,\
-    _ifpath = ifpath,\
     _ofpath = ofpath,\
     _dumpfpath = dumpfpath,\
     _loadfpath = loadfpath,\
-    _preselect = preselect\
+    _preselect = preselect,\
+    _search_term = search_term\
     );
 
 x.run(dump = dump, load = load, );

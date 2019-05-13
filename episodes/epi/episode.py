@@ -86,8 +86,8 @@ class episode:
                 do_nothing();
             if(self.m3u8.unify()):
                 # print(self.m3u8.content);
-                with open(self.fpath, 'w') as f:
-                    f.write(self.m3u8.content);
+                with open(self.fpath, 'wb') as f:
+                    f.write(self.m3u8.content.encode());
                 print("-- \033[32m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
                 return False;
             else:

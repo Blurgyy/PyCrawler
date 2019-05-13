@@ -10,6 +10,7 @@ import socket
 import struct
 import sys
 import threading
+from urllib.parse import unquote
 
 def do_nothing():
     pass;
@@ -30,19 +31,22 @@ def supervisor(th, current_dlcnt, maximum_dlcnt):
     current_dlcnt[0] -= 1;
 def read_terminal_args():
     try:
+        # sys.getfilesystemencoding = lambda: 'utf-8';
         default = {
             '_dl_option': 's',
             '_maximum_dlcnt': 8,
             '_dumpfpath': None,
             '_loadfpath': None,
-            '_ifpath': None,
             '_ofpath': None,
-            '_preselect': None
+            '_preselect': None,
+            '_search_term': None
         };
         ret = default;
         if(len(sys.argv) == 1):
             return ret;
-        for i in range(1, len(sys.argv)):
+        i = 0;
+        while(i < len(sys.argv)):
+            # print(sys.argv[i], "<br>");
             if(sys.argv[i] == '-c'):    # `-c <n>` download $n items simultaneously
                 i += 1;
                 _maximum_dlcnt = 8;
@@ -68,9 +72,9 @@ def read_terminal_args():
                 ret['_dl_option'] = 'n';
             elif(sys.argv[i] == '-o'):  # `-o` (o)verwrite
                 ret['_dl_option'] = 'o';
-            elif(sys.argv[i] == '-r'):
+            elif(sys.argv[i] == '-s'):
                 i += 1;
-                ret['_ifpath'] = sys.argv[i];
+                ret['_search_term'] = unquote(sys.argv[i]);
             elif(sys.argv[i] == '-w'):
                 i += 1;
                 ret['_ofpath'] = sys.argv[i];
@@ -80,6 +84,7 @@ def read_terminal_args():
             elif(sys.argv[i] == '-load'):
                 i += 1;
                 ret['_loadfpath'] = sys.argv[i];
+            i += 1;
         # print(ret);
         return ret;
     except KeyboardInterrupt:

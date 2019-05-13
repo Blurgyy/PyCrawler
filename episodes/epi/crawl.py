@@ -1,10 +1,11 @@
 #!/usr/bin/python
-#-*- coding:utf-8 -*-
+#-*- coding: utf-8 -*-
 __author__ = "Blurgy";
 
 import re
 import os
 import pickle
+import chardet
 from urllib.parse import quote
 from .tvseries import tvseries
 from .globalfunctions import *
@@ -12,19 +13,21 @@ from .globalfunctions import *
 
 #### Global
 class crawler:
-    def __init__(self, _dl_option = None, _maximum_dlcnt = 8, _dumpfpath = None, _loadfpath = None, _ifpath = None, _ofpath = None, _preselect = None):
+    def __init__(self, _dl_option = None, _maximum_dlcnt = 8,\
+        _dumpfpath = None, _loadfpath = None,\
+        _ofpath = None, _preselect = None, _search_term = None):
         try:
             self.base_url = ["https://91mjw.com/", "http://v.mtyee.com/", ];
             self.s_url = [];
             self.s_url.append(self.base_url[0] + "?s=");
             self.s_url.append(self.base_url[1] + "sssv.php?top=10&q=")
             self.series = [];
+            self.search_term = _search_term;
             self.Id = _preselect;
             self.dl_option = _dl_option;
             self.maximum_dlcnt = _maximum_dlcnt;
             self.dumpfpath = _dumpfpath;
             self.loadfpath = _loadfpath;
-            self.ifpath = _ifpath;
             self.ofpath = _ofpath;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -50,6 +53,8 @@ class crawler:
                     self.search();
             else:
                 self.search();
+                if(self.ofpath):
+                    self.write_select_list();
             if(dump):
                 while(self.dumpfpath and os.path.exists(self.dumpfpath)):
                     if(self.dumpfpath):
@@ -69,9 +74,9 @@ class crawler:
         except Exception as e:
             print("\033[1;31mcrawl.py::crawler::run(): %s\033[0m", e);
 
-    def search(self, search_term = None, ):
+    def search(self, ):
         try:
-            search_term = self.read_search_term_from_file();
+            search_term = self.search_term;
             while(search_term == None or len(search_term) == 0):
                 print("input search terms: ", end = "");
                 search_term = input().strip();
@@ -115,30 +120,6 @@ class crawler:
             print("\033[1;31mcrawl.py::crawler::search(): %s\033[0m" % e);
             return None;
 
-    def read_search_term_from_file(self, ):
-        try:
-            ret = None;
-            if(self.ifpath):
-                if(os.path.exists(self.ifpath)):
-                    with open(self.ifpath) as f:
-                        ret = f.read().strip().split('\n')[0];
-                    if(len(ret) > 30):
-                        x = ret;
-                        ret = "";
-                        for i in range(30):
-                            ret += x[i];
-                else:
-                    print("[%s]: file not found" % (self.ifpath));
-            else:
-                do_nothing();
-            return ret;
-        except KeyboardInterrupt:
-            print("\n KeyboardInterrupt, exiting");
-            exit();
-        except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::read_search_term_from_file(): %s\033[0m" % e);
-            return None;
-
     def select(self, ):
         try:
             ret = [];
@@ -148,11 +129,11 @@ class crawler:
                 return ret;
             if(self.Id):
                 return self.Id;
-            print("Search Results(\033[1m%d\033[0m):" % len(self.series));
-            for i in range(len(self.series)):
-                print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
-            self.write_select_list();
-            # print("\nselect by entering the id of the desired TVseries (enter ! to abort): ", end = "");
+            else:
+                print("Search Results(\033[1m%d\033[0m):" % len(self.series));
+                for i in range(len(self.series)):
+                    print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
+                # print("\nselect by entering the id of the desired TVseries (enter ! to abort): ", end = "");
             entryid = "";
             while(len(entryid) == 0):
                 print("select by entering the id of the desired TVseries (enter \033[1;34m!\033[0m to abort): ", end = "");
@@ -205,13 +186,13 @@ class crawler:
                     if(self.ofpath[0] == '$'):
                         self.ofpath = self.ofpath.strip(' \n$');
                         break;
+                # print("generating slist file<br>");
                 with open(self.ofpath, 'w') as f:
                     do_nothing();
-                with open(self.ofpath, 'w') as f:
+                with open(self.ofpath, 'wb') as f:
                     for x in self.series:
-                        f.write("%s\n" % (x.sname));
-                print("select list written as [%s], exiting" % (self.ofpath));
-                exit();
+                        f.write((x.sname + "\n").encode('utf-8'));
+                print("select list written as [%s]" % (self.ofpath));
             else:
                 do_nothing();
         except KeyboardInterrupt:
