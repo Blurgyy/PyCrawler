@@ -127,7 +127,7 @@ class crawler:
                 print("nothing to select, abort");
                 self.Id = ret;
                 return ret;
-            if(self.Id):
+            if(self.Id != None):
                 return self.Id;
             else:
                 print("Search Results(\033[1m%d\033[0m):" % len(self.series));

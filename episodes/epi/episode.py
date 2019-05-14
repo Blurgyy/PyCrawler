@@ -49,7 +49,8 @@ class episode:
                     self.vid = re.findall(r'vid="(.*/)(.*?m3u8).*?"', content)[0];
                 else:
                     self.vid = re.findall(r'vid="(.*?)"', content)[0];
-                    self.vid = re.findall(r'(.*/)(\w+)', self.vid)[0];
+                    self.vid = unquote(self.vid);
+                    self.vid = re.findall(r'(.*/)([\.\w]+)', self.vid)[0];
                 # print("in getvid:", self.vid);
             else:
                 print("no vid found");

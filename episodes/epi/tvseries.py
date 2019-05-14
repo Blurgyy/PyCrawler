@@ -73,13 +73,14 @@ class tvseries:
                 all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S);
                 single_episodes_raw = [];
                 for x in all_episodes_raw:
-                    single_episodes_raw += re.findall(r'<a.*?href="(.*?)">(.*?)</a>', x);
+                    single_episodes_raw += re.findall(r'<a.*?href=".*?".*?id="(.*?)">(.*?)</a>', x);
                 # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
                 print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
                 # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
+                    # print(single_episode[0]);
                     self.episodes.append(episode(\
-                        _base_url = self.base_url + single_episode[0],\
+                        _base_url = split_host(self.base_url) + "/vplay/" + single_episode[0] + ".html",\
                         _epname = (single_episode[1].strip()),\
                         _from_series = self\
                         ));

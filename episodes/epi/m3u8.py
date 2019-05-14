@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 __author__ = "Blurgy";
 
-# from .episode import episode
+from urllib.parse import unquote
 from .globalfunctions import *
 
 class m3u8:
@@ -10,6 +10,8 @@ class m3u8:
         try:
             # print("initializing class m3u8 with (base_url = %s, from_ep = %s)" % (_base_url, _from_ep, ));
             self.base_url = _base_url;
+            if(not is_url(self.base_url)):
+                self.base_url = unquote(self.base_url);
             if(not is_url(self.base_url)):
                 raise Exception("invalid m3u8 url");
             self.from_ep = _from_ep;
