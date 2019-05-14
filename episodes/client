@@ -16,6 +16,7 @@ dump = not not dumpfpath;
 load = not not loadfpath;
 preselect = args['_preselect'];
 search_term = args['_search_term'];
+verbose = args['_verbose'];
 
 x = epi.crawler(\
     _dl_option = dl_option,\
@@ -24,7 +25,8 @@ x = epi.crawler(\
     _dumpfpath = dumpfpath,\
     _loadfpath = loadfpath,\
     _preselect = preselect,\
-    _search_term = search_term\
+    _search_term = search_term,\
+    _verbose = verbose\
     );
 
 x.run(dump = dump, load = load, );

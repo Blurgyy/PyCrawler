@@ -12,8 +12,9 @@ from .globalfunctions import *
 
 #### Series
 class tvseries:
-    def __init__(self, htmltext = None, jsontext = None, _dl_option = None, _maximum_dlcnt = 8, ):
+    def __init__(self, htmltext = None, jsontext = None, _dl_option = None, _maximum_dlcnt = 8, _verbose = True, ):
         try:
+            print("<br><br>(%s)<br><br>" % _verbose);
             # print("initializing class 'tvseries' with (_dl_option = %s, _maximum_dlcnt = %s)" % (_dl_option, _maximum_dlcnt));
             self.sname = None;
             self.base_url = None;
@@ -21,6 +22,7 @@ class tvseries:
             self.episodes = [];
             self.dl_option = _dl_option;
             self.maximum_dlcnt = _maximum_dlcnt;
+            self.verbose = _verbose;
             if(htmltext != None):
                 self.parse_html(htmltext);
             elif(jsontext != None):
@@ -63,9 +65,11 @@ class tvseries:
             if(self.dl_option == 'd'):
                 if(os.path.exists(self.sname)):
                     shutil.rmtree(self.sname);
-                    print("\033[1;33mok deleted folder: [%s]\033[0m" % (self.sname));
+                    if(self.verbose):
+                        print("\033[1;33mok deleted folder: [%s]\033[0m" % (self.sname));
                 else:
-                    print("no such folder as [%s], file structure unchanged" % (self.sname));
+                    if(self.verbose):
+                        print("no such folder as [%s], file structure unchanged" % (self.sname));
                 return ret;
             self.episodes = [];
             content = get_content(self.base_url);
@@ -74,15 +78,16 @@ class tvseries:
                 single_episodes_raw = [];
                 for x in all_episodes_raw:
                     single_episodes_raw += re.findall(r'<a.*?href=".*?".*?id="(.*?)">(.*?)</a>', x);
-                # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
-                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
+                if(self.verbose):
+                    # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
+                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                    # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
                     # print(single_episode[0]);
                     self.episodes.append(episode(\
                         _base_url = split_host(self.base_url) + "/vplay/" + single_episode[0] + ".html",\
                         _epname = (single_episode[1].strip()),\
-                        _from_series = self\
+                        _from_series = self, _verbose = self.verbose\
                         ));
                     ret = True;
                 return ret;
@@ -109,7 +114,8 @@ class tvseries:
                     _m3u8_url += tmp_m3u8_url;
                     # print("ITERING: tmp_m3u8_url = %s" % tmp_m3u8_url);
                 # print("len = %d, %d" % (len(single_episodes_raw), len(_m3u8_url)));
-                print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                if(self.verbose):
+                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
                 print("%d video(s) will be downloaded" % (len(_m3u8_url)));
                 for m3u8_url in _m3u8_url:
                     # print(m3u8_url);
@@ -131,12 +137,13 @@ class tvseries:
                         _epname = (current_episode[1].strip()),\
                         _from_series = self,\
                         HASH = self._hash,\
-                        _m3u8_url = m3u8_url[0]\
+                        _m3u8_url = m3u8_url[0], _verbose = self.verbose\
                         ));
                     ret = True;
                 return ret;
             else:
-                print("inexplicit info when processing %s(%s), abort" % (self.sname, self.base_url));
+                if(self.verbose):
+                    print("inexplicit info when processing %s(%s), abort" % (self.sname, self.base_url));
                 return ret;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");

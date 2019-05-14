@@ -15,7 +15,8 @@ from .globalfunctions import *
 class crawler:
     def __init__(self, _dl_option = None, _maximum_dlcnt = 8,\
         _dumpfpath = None, _loadfpath = None,\
-        _ofpath = None, _preselect = None, _search_term = None):
+        _ofpath = None, _preselect = None, _search_term = None,\
+        _verbose = True):
         try:
             self.base_url = ["https://91mjw.com/", "http://v.mtyee.com/", ];
             self.s_url = [];
@@ -29,6 +30,7 @@ class crawler:
             self.dumpfpath = _dumpfpath;
             self.loadfpath = _loadfpath;
             self.ofpath = _ofpath;
+            self.verbose = _verbose;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -43,11 +45,16 @@ class crawler:
                     tmp_dumpfpath = self.dumpfpath;
                     tmp_loadfpath = self.loadfpath;
                     tmp_Id = self.Id;
+                    tmp_verbose = self.verbose;
+                    print("tmp_verbose =", tmp_verbose);
                     with open(self.loadfpath, 'rb') as f:
                         self = pickle.load(f);
                     self.loadfpath = tmp_loadfpath;
                     self.dumpfpath = tmp_dumpfpath;
                     self.Id = tmp_Id;
+                    self.verbose = tmp_verbose;
+                    for x in self.series:
+                        x.verbose = self.verbose;
                 else:
                     print("[%s]: dump file not found" % (self.loadfpath));
                     self.search();
@@ -87,7 +94,7 @@ class crawler:
                 search_results_raw = re.findall(r'(m-movies.*?</article></div>)', content, flags = re.S)[0];
                 series_metadata_raw = re.findall(r'(<article class="u-movie">.*?</article>)', search_results_raw);
                 for htmltext in series_metadata_raw:
-                    x = tvseries(htmltext, _dl_option = self.dl_option, _maximum_dlcnt = self.maximum_dlcnt);
+                    x = tvseries(htmltext, _dl_option = self.dl_option, _maximum_dlcnt = self.maximum_dlcnt, _verbose = self.verbose);
                     if(x.sname != None):
                         self.series.append(x);
             except KeyboardInterrupt:
@@ -102,7 +109,8 @@ class crawler:
                 content = get_content(targ_url, headers = {'Origin': "http://www.fjisu.com"});
                 series_metadata_raw = re.findall(r'(\{.*?\})', content, flags = re.S);
                 for jsontext in series_metadata_raw:
-                    x = tvseries(jsontext = jsontext, _dl_option = self.dl_option, _maximum_dlcnt = self.maximum_dlcnt);
+                    print("initializing tvseries: verbose = %s" % self.verbose);
+                    x = tvseries(jsontext = jsontext, _dl_option = self.dl_option, _maximum_dlcnt = self.maximum_dlcnt, _verbose = self.verbose);
                     if(x.sname != None):
                         self.series.append(x);
                 if(len(self.series) == 0):
@@ -130,13 +138,13 @@ class crawler:
             if(self.Id != None):
                 return self.Id;
             else:
-                print("Search Results(\033[1m%d\033[0m):" % len(self.series));
-                for i in range(len(self.series)):
-                    print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
-                # print("\nselect by entering the id of the desired TVseries (enter ! to abort): ", end = "");
+                if(self.verbose):
+                    print("Search Results(\033[1m%d\033[0m):" % len(self.series));
+                    for i in range(len(self.series)):
+                        print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
             entryid = "";
             while(len(entryid) == 0):
-                print("select by entering the id of the desired TVseries (enter \033[1;34m!\033[0m to abort): ", end = "");
+                print("select by entering the id of the desired video(s) (enter \033[1;34m!\033[0m to abort): ", end = "");
                 entryid = input().strip();
                 entrylist = entryid.split();
                 for i in entrylist:
@@ -159,7 +167,8 @@ class crawler:
                         # print("invalid input, please re-enter: ", end = "");
                         # entryid = "";
                     else:
-                        print("ok selected [%02d. %s]" % (int(i), self.series[int(i)-1].sname));
+                        if(self.verbose):
+                            print("ok selected [%02d. %s]" % (int(i), self.series[int(i)-1].sname));
                         ret.append(int(i)-1);
                 if(len(ret) == 0):
                     entryid = "";

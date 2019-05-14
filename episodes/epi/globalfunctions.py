@@ -39,7 +39,8 @@ def read_terminal_args():
             '_loadfpath': None,
             '_ofpath': None,
             '_preselect': None,
-            '_search_term': None
+            '_search_term': None,
+            '_verbose': True
         };
         ret = default;
         if(len(sys.argv) == 1):
@@ -84,6 +85,8 @@ def read_terminal_args():
             elif(sys.argv[i] == '-load'):
                 i += 1;
                 ret['_loadfpath'] = sys.argv[i];
+            elif(sys.argv[i] == '-x'):
+                ret['_verbose'] = False;
             i += 1;
         # print(ret);
         return ret;

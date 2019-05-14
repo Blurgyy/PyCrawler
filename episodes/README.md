@@ -27,7 +27,8 @@ import epi
     - `-n` 以新的文件名保存
     - `-o` 覆盖文件名重复的文件
     - `-s <string>` 以 `${string}` 内容为关键字搜索 
-    - `-w <filepath>` 将选择下载项时的 list 输出到文件 `${filepath}` 
+    - `-w <filepath>` 将选择下载项时的 list 输出到文件 `${filepath}`
+    - `-x` 抑制输出 
     - `-load <filepath>` 读取 `${filepath}` 文件为一个 `crawler` 对象 (此时不从键盘读取搜索内容) 
     - `-dump <filepath>` 搜索结束后，将自身存为 `${filepath}` (存为二进制文件，可以使用 `-load` 重新读取，此时没有 `选择下载项` 和 `下载` 过程) 并结束
         - [`globalfunctions.py`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/epi/globalfunctions.py) 中，函数 `read_terminal_args()` 返回一个字典，作为crawl的参数，具体用法见 [`client`](https://github.com/Blurgyy/PyCrawler/blob/master/episodes/client). 例：

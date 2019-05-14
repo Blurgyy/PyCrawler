@@ -12,7 +12,7 @@ from .globalfunctions import *
 
 #### class episode
 class episode:
-    def __init__(self, _base_url = None, _epname = None, _from_series = None, HASH = None, _m3u8_url = None, ):
+    def __init__(self, _base_url = None, _epname = None, _from_series = None, HASH = None, _m3u8_url = None, _verbose = True, ):
         try:
             # print("initalizing episode with (%s, %s, %s), m3u8_url = %s" % (_base_url, str(_epname), _from_series, _m3u8_url));
             self.base_url = _base_url;
@@ -31,6 +31,7 @@ class episode:
                 raise Exception("m3u8 initalization failed");
             self.dl_option = self.from_series.dl_option;
             self.duplicate_id = 1;
+            self.verbose = _verbose;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -68,7 +69,8 @@ class episode:
                 os.makedirs(self.from_series.sname);
             if(os.path.exists(self.fpath)):
                 if(self.dl_option == 'n'):
-                    print("-- \033[33m[%s] duplicated, \033[0m" % (self.fpath), end = "");
+                    if(self.verbose):
+                        print("-- \033[33m[%s] duplicated, \033[0m" % (self.fpath), end = "");
                     self.duplicate_id += 1;
                     self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                     self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
@@ -76,12 +78,15 @@ class episode:
                         self.duplicate_id += 1;
                         self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                         self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
-                    print("\033[33mdownloading as [%s]\033[0m" % (self.fpath));
+                    if(self.verbose):
+                        print("\033[33mdownloading as [%s]\033[0m" % (self.fpath));
                 elif(self.dl_option == 'o'):
-                    print("-- \033[33m[%s] duplicated, overwriting\033[0m" % (self.fpath));
+                    if(self.verbose):
+                        print("-- \033[33m[%s] duplicated, overwriting\033[0m" % (self.fpath));
                     do_nothing();
                 elif(self.dl_option == 's'):
-                    print("-- \033[33m[%s] duplicated, skipping\033[0m" % (self.fpath));
+                    if(self.verbose):
+                        print("-- \033[33m[%s] duplicated, skipping\033[0m" % (self.fpath));
                     return False;
             with open(self.fpath, 'w') as f:
                 do_nothing();
@@ -89,7 +94,8 @@ class episode:
                 # print(self.m3u8.content);
                 with open(self.fpath, 'wb') as f:
                     f.write(self.m3u8.content.encode());
-                print("-- \033[32m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
+                if(self.verbose):
+                    print("-- \033[32m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
                 return False;
             else:
                 if(os.path.exists(self.fpath)):
