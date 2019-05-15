@@ -14,7 +14,7 @@ from .globalfunctions import *
 class tvseries:
     def __init__(self, htmltext = None, jsontext = None, _dl_option = None, _maximum_dlcnt = 8, _verbose = True, ):
         try:
-            print("<br><br>(%s)<br><br>" % _verbose);
+            # print("<br><br>(%s)<br><br>" % _verbose);
             # print("initializing class 'tvseries' with (_dl_option = %s, _maximum_dlcnt = %s)" % (_dl_option, _maximum_dlcnt));
             self.sname = None;
             self.base_url = None;

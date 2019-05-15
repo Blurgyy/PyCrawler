@@ -109,7 +109,7 @@ class crawler:
                 content = get_content(targ_url, headers = {'Origin': "http://www.fjisu.com"});
                 series_metadata_raw = re.findall(r'(\{.*?\})', content, flags = re.S);
                 for jsontext in series_metadata_raw:
-                    print("initializing tvseries: verbose = %s" % self.verbose);
+                    # print("initializing tvseries: verbose = %s" % self.verbose);
                     x = tvseries(jsontext = jsontext, _dl_option = self.dl_option, _maximum_dlcnt = self.maximum_dlcnt, _verbose = self.verbose);
                     if(x.sname != None):
                         self.series.append(x);
