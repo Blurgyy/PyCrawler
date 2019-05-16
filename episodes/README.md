@@ -39,6 +39,6 @@ import epi
           -w output_filepath 
           ```
 
--  `*.m3u8` ：下载 [`vlc player`](https://www.videolan.org/vlc/) 本地播放，或安装 `chrome` 插件 [`Native HLS Playback`](https://chrome.google.com/webstore/detail/emnphkkblegpebimobpbekeedfgemhof) 在浏览器内播放
+-  `*.m3u8` ：下载 [`vlc player`](https://www.videolan.org/vlc/) 本地播放，或安装 `chrome` 插件 [`Native HLS Playback`](https://raw.githubusercontent.com/Blurgyy/PyCrawler/master/episodes/Native-HLS-Playback-0.10.1.crx) 在浏览器内播放
 
 
