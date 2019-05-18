@@ -81,13 +81,19 @@ class m3u8:
             print("\033[1;31mm3u8.py::m3u8::unify(): %s\033[0m" % e);
             return None;
 
-    def write_bin(self, url, fname, ):
+    def write_bin(self, url, fname, logger, logger_fname, ):  # logger is a **set**
         try:
             if(not is_url(url)):
                 raise Exception("invalid ts url");
             fname += ".ts";
-            with open(fname, 'wb') as f:
-                f.write(requests.get(url, timeout = 20.0).content);
+            if((fname in logger) or os.path.exists(fname)):
+                pass;
+            else:
+                with open(fname, 'wb') as f:
+                    f.write(requests.get(url).content);
+                logger.add(fname);
+                with open(logger_fname, 'a') as f:
+                    f.write(fname + '\n');
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -95,11 +101,17 @@ class m3u8:
             print("\033[1;31mm3u8.py::m3u8::write_bin(): %s\033[0m" % e);
             self.retry_pool.append([url, fname]);
 
-    def download(self, fname, ext = "ts", ): # convert the m3u8 document to a video file, default extension name is *.ts
+    def download(self, fname = None, ext = "ts", ): # convert the m3u8 document to a video file, default extension name is *.ts
         try:
-            fname += '.' + ext;
             if(self.content == None):
                 self.unify();
+            if(fname == None):
+                if(self.from_file != None):
+                    fname = self.from_file.split('./')[-2];
+                else:
+                    fname = hash(self.content);
+            fname += '.' + ext;
+            print("video will be saved as [%s], starting download" % (fname));
             splitted_src = [];
             for line in self.content.splitlines():
                 if(is_url(line) and is_ts(line)):
@@ -109,34 +121,53 @@ class m3u8:
                 os.makedirs(tmp_dl_dir);
             os.chdir(tmp_dl_dir);
             toturlcnt = len(splitted_src);
-            downloaded_cnt = [0];
-            progbar_thread = myThread(target = self.progress_bar, args = (downloaded_cnt, toturlcnt, ));
+            th_supervisor_list = [];
             current_dlcnt = [0];
-            th_supervisor_list = [];
+            logger = set();
+            logger_fname = ".download.log";
+            if(os.path.exists(logger_fname)):
+                logger = set(open(logger_fname).read().strip().splitlines());
+                print("\033[33m[%s/%s] found, resuming download [%d/%d]...\033[0m" % (tmp_dl_dir, logger_fname, len(logger), toturlcnt));
+            else:
+                pass;
+            downloaded_cnt = [0];
             self.is_downloading = True;
+            progbar_thread = myThread(target = self.progress_bar, args = (downloaded_cnt, toturlcnt, ));
             progbar_thread.start();
+            for (root, dirs, files) in os.walk('.'):
+                if(root == '.'):
+                    for x_name in files:
+                        if(x_name in logger):
+                            pass;
+                        else:
+                            os.remove(x_name);
+            with open(logger_fname, 'w') as f:
+                for x in logger:
+                    f.write(x + '\n');
             for i in range(toturlcnt):
-                th = myThread(target = self.write_bin, args = (splitted_src[i], "%06d"%(i)));
-                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 16, downloaded_cnt));
+                th = myThread(target = self.write_bin, args = (splitted_src[i], "%06d"%(i), logger, logger_fname));
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 12, downloaded_cnt));
                 th_supervisor_list.append(th_supervisor);
                 th.start();
                 th_supervisor.start();
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
-            print("\nretrying failed items one more time...");
-            th_supervisor_list = [];
-            for retry_item in self.retry_pool:
-                th = myThread(target = self.write_bin, args = (retry_item[0], retry_item[1]));
-                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 16, downloaded_cnt));
-                th_supervisor_list.append(th_supervisor);
-                th.start();
-                th_supervisor.start();
-            for th_supervisor in th_supervisor_list:
-                th_supervisor.join();
+            if(len(self.retry_pool) > 0):
+                print("\nretrying failed items one more time...");
+                th_supervisor_list = [];
+                for retry_item in self.retry_pool:
+                    print(retry_item[1]);
+                    th = myThread(target = self.write_bin, args = (retry_item[0], retry_item[1], logger, logger_fname));
+                    th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 12, downloaded_cnt));
+                    th_supervisor_list.append(th_supervisor);
+                    th.start();
+                    th_supervisor.start();
+                for th_supervisor in th_supervisor_list:
+                    th_supervisor.join();
             self.is_downloading = False;
             progbar_thread.join();
             os.chdir("..");
-            print("download done, stitching into one file...");
+            print("\ndownload done, stitching into one file...");
             with open(fname, 'wb') as f:
                 x_name_list = [];
                 for (root, dirs, files) in os.walk(tmp_dl_dir):
@@ -149,8 +180,8 @@ class m3u8:
                 for x_name in x_name_list:
                     with open(x_name, 'rb') as fx:
                         f.write(fx.read());
-            print("done.");
-            shutil.rmtree(tmp_dl_dir);
+            print("\033[32mdone\033[0m");
+            # shutil.rmtree(tmp_dl_dir);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -170,11 +201,11 @@ class m3u8:
                 for i in range(length-int(done)):
                     print('-', end = "");
                 print(']', end = "");
-                print("%02.1f%%" % (percent * 100), end = "\r");
-                if(downloaded_cnt == total_cnt):
+                print("%02.2f%%" % (percent * 100), end = "\r");
+                if(downloaded_cnt[0] == total_cnt):
                     print('\n');
                     return;
-                time.sleep(0.3);
+                # time.sleep(0.1);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
