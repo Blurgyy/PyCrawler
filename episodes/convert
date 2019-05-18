@@ -1,0 +1,29 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+__author__ = "Blurgy";
+
+"""
+Runs on python 3+
+Converts .m3u8 document(s) into .ts video(s) 
+"""
+
+import os
+import sys
+import epi
+from epi.globalfunctions import *
+
+
+if(len(sys.argv) == 1):
+	print("Usage:\n\t./convert [$FILE_OR_DIR_NAMES, ]");
+
+files_to_download = [];
+for i in range(len(sys.argv)):
+	if(i == 0):
+		continue;
+	if(os.path.exists(sys.argv[i]) and os.path.isfile(sys.argv[i])):
+		fname = sys.argv[i];
+		files_to_download.append(fname);
+
+for fname in files_to_download:
+	x = epi.m3u8(_from_file = fname);
+	x.download(split_fname(fname));
