@@ -2,20 +2,30 @@
 #-*- coding:utf-8 -*-
 __author__ = "Blurgy";
 
+import os
+import time
+import shutil
+import requests
 from urllib.parse import unquote
 from .globalfunctions import *
 
 class m3u8:
-    def __init__(self, _base_url = None, _from_ep = None, ):
+    def __init__(self, _base_url = None, _from_ep = None, _from_file = None, ):
         try:
             # print("initializing class m3u8 with (base_url = %s, from_ep = %s)" % (_base_url, _from_ep, ));
             self.base_url = _base_url;
-            if(not is_url(self.base_url)):
-                self.base_url = unquote(self.base_url);
-            if(not is_url(self.base_url)):
-                raise Exception("invalid m3u8 url");
+            if(self.base_url != None):
+                if(not is_url(self.base_url)):
+                    self.base_url = unquote(self.base_url);
+                if(not is_url(self.base_url)):
+                    print("invalid m3u8 url");
             self.from_ep = _from_ep;
+            self.from_file = _from_file;
             self.content = None;
+            if(self.from_file != None and os.path.exists(self.from_file)):
+                self.content = open(self.from_file).read();
+            self.is_downloading = False;
+            self.retry_pool = [];
             # self.fetch();
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -23,7 +33,7 @@ class m3u8:
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::__init__(): %s\033[0m" % e);
 
-    def unify(self, url = None, ):  # download, and unify the m3u8 document to a universal version (i.e. playable)
+    def unify(self, url = None, ):  # download and unify the m3u8 document to a universal version (i.e. playable)
         try:
             if(url == None):
                 url = self.base_url;
@@ -71,13 +81,104 @@ class m3u8:
             print("\033[1;31mm3u8.py::m3u8::unify(): %s\033[0m" % e);
             return None;
 
+    def write_bin(self, url, fname, ):
+        try:
+            if(not is_url(url)):
+                raise Exception("invalid ts url");
+            fname += ".ts";
+            with open(fname, 'wb') as f:
+                f.write(requests.get(url, timeout = 20.0).content);
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("\033[1;31mm3u8.py::m3u8::write_bin(): %s\033[0m" % e);
+            self.retry_pool.append([url, fname]);
+
     def download(self, fname, ext = "ts", ): # convert the m3u8 document to a video file, default extension name is *.ts
         try:
-            do_nothing();   # does nothing, for now
+            fname += '.' + ext;
+            if(self.content == None):
+                self.unify();
+            splitted_src = [];
+            for line in self.content.splitlines():
+                if(is_url(line) and is_ts(line)):
+                    splitted_src.append(line);
+            tmp_dl_dir = fname + ".download";
+            if(not os.path.exists(tmp_dl_dir)):
+                os.makedirs(tmp_dl_dir);
+            os.chdir(tmp_dl_dir);
+            toturlcnt = len(splitted_src);
+            downloaded_cnt = [0];
+            progbar_thread = myThread(target = self.progress_bar, args = (downloaded_cnt, toturlcnt, ));
+            current_dlcnt = [0];
+            th_supervisor_list = [];
+            self.is_downloading = True;
+            progbar_thread.start();
+            for i in range(toturlcnt):
+                th = myThread(target = self.write_bin, args = (splitted_src[i], "%06d"%(i)));
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 16, downloaded_cnt));
+                th_supervisor_list.append(th_supervisor);
+                th.start();
+                th_supervisor.start();
+            for th_supervisor in th_supervisor_list:
+                th_supervisor.join();
+            print("\nretrying failed items one more time...");
+            th_supervisor_list = [];
+            for retry_item in self.retry_pool:
+                th = myThread(target = self.write_bin, args = (retry_item[0], retry_item[1]));
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 16, downloaded_cnt));
+                th_supervisor_list.append(th_supervisor);
+                th.start();
+                th_supervisor.start();
+            for th_supervisor in th_supervisor_list:
+                th_supervisor.join();
+            self.is_downloading = False;
+            progbar_thread.join();
+            os.chdir("..");
+            print("download done, stitching into one file...");
+            with open(fname, 'wb') as f:
+                x_name_list = [];
+                for (root, dirs, files) in os.walk(tmp_dl_dir):
+                    if(root == tmp_dl_dir):
+                        for x in files:
+                            x_name = root + '/' + x;
+                            if(is_ts(x_name)):
+                                x_name_list.append(x_name);
+                x_name_list.sort();
+                for x_name in x_name_list:
+                    with open(x_name, 'rb') as fx:
+                        f.write(fx.read());
+            print("done.");
+            shutil.rmtree(tmp_dl_dir);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::download(): %s\033[0m" % e);
+            return True;
+
+    def progress_bar(self, downloaded_cnt, total_cnt, ):
+        try:
+            while(self.is_downloading):
+                length = os.get_terminal_size().columns - 2 - 5 - 1;
+                percent = downloaded_cnt[0] / total_cnt;
+                done = int(percent * length);
+                print("[", end = "");
+                for i in range(done):
+                    print('>', end = "");
+                for i in range(length-int(done)):
+                    print('-', end = "");
+                print(']', end = "");
+                print("%02.1f%%" % (percent * 100), end = "\r");
+                if(downloaded_cnt == total_cnt):
+                    print('\n');
+                    return;
+                time.sleep(0.3);
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("\033[1;31mm3u8.py::m3u8::progress_bar(): %s\033[0m" % e);
             return True;
 

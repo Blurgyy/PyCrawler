@@ -159,7 +159,7 @@ class tvseries:
             th_supervisor_list = [];
             for ep in self.episodes:
                 th = myThread(target = ep.download, );
-                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, self.maximum_dlcnt));
+                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, self.maximum_dlcnt, [0]));
                 th_supervisor_list.append(th_supervisor);
                 th.start();
                 th_supervisor.start();
