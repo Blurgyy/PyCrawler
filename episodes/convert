@@ -4,7 +4,7 @@ __author__ = "Blurgy";
 
 """
 Runs on python 3+
-Converts .m3u8 document(s) into .ts video(s) 
+Converts .m3u8 document into .ts video 
 """
 
 import os
@@ -13,8 +13,15 @@ import epi
 from epi.globalfunctions import *
 
 
-if(len(sys.argv) == 1):
-	print("Usage:\n\t./convert [$FILE_OR_DIR_NAMES, ]");
+if(len(sys.argv) <= 1):
+	print("Usage:\n\t./convert $M3U8_FILE_NAME\n");
+# 	print(\
+# """\t\033[33m-- NOTE: i am not expecting $SAVE_VIDEO_NAME to have an
+# \t   extenson name such as '.mp4' or whatever. this script
+# \t   will always append '.ts' after $SAVE_VIDEO_NAME.
+# \t-- \033[31mbut $M3U8_FILE_NAME does have to be an existing path\033[0m"""\
+# );
+	exit();
 
 files_to_download = [];
 for i in range(len(sys.argv)):

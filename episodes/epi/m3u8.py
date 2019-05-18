@@ -127,7 +127,7 @@ class m3u8:
             logger_fname = ".download.log";
             if(os.path.exists(logger_fname)):
                 logger = set(open(logger_fname).read().strip().splitlines());
-                print("\033[33m[%s/%s] found, resuming download [%d/%d]...\033[0m" % (tmp_dl_dir, logger_fname, len(logger), toturlcnt));
+                print("\033[33mlogfile found, resuming previous download (%d/%d)...\033[0m" % (len(logger), toturlcnt));
             else:
                 pass;
             downloaded_cnt = [0];
@@ -181,7 +181,7 @@ class m3u8:
                     with open(x_name, 'rb') as fx:
                         f.write(fx.read());
             print("\033[32mdone\033[0m");
-            # shutil.rmtree(tmp_dl_dir);
+            shutil.rmtree(tmp_dl_dir);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -205,7 +205,7 @@ class m3u8:
                 if(downloaded_cnt[0] == total_cnt):
                     print('\n');
                     return;
-                # time.sleep(0.1);
+                # time.sleep(0.05);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();

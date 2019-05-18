@@ -33,7 +33,17 @@ def split_host(x):
 def split_fname(x):
     if(x == None):
         return None;
-    return x.split('/')[-1].split('.')[0];
+    ret = "";
+    full_fname = x.split('/')[-1];
+    splt = full_fname.split('.');
+    for i in range(len(splt)):
+        if(i == len(splt) - 1):
+            continue;
+        if(i == 0):
+            ret += splt[i];
+        else:
+            ret += '.' + splt[i];
+    return ret;
 def supervisor(th, opening_thcnt, maximum_thcnt, finished_thcnt, ):
     # where opening_thcnt and finished_thcnt are **list**s, while maximum_thcnt is an **integer** 
     try:
