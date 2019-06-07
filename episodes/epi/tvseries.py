@@ -37,7 +37,7 @@ class tvseries:
 
     def parse_html(self, htmltext, ):
         try:
-            tmp = re.findall(r'<a title=".*?/(.*?)在线.*?".*?href="(.*?)"', htmltext)[0];
+            tmp = re.findall(r'<a title="(.*?)".*?href="(.*?)"', htmltext)[0];
             self.sname = tmp[0].replace('/', '-').strip();
             self.base_url = tmp[1].strip();
         except KeyboardInterrupt:
