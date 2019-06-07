@@ -46,7 +46,7 @@ class crawler:
                     tmp_loadfpath = self.loadfpath;
                     tmp_Id = self.Id;
                     tmp_verbose = self.verbose;
-                    print("tmp_verbose =", tmp_verbose);
+                    # print("tmp_verbose =", tmp_verbose);
                     with open(self.loadfpath, 'rb') as f:
                         self = pickle.load(f);
                     self.loadfpath = tmp_loadfpath;

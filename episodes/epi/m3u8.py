@@ -83,19 +83,24 @@ class m3u8:
 
     def write_bin(self, url, fname, logger, logger_fname, ):  # logger is a **set**
         try:
-            if(not is_url(url)):
-                raise Exception("invalid ts url");
-            fname += ".ts";
-            if((fname in logger) or os.path.exists(fname)):
-                pass;
-            else:
-                with open(fname, 'wb') as f:
-                    f.write(requests.get(url).content);
-                logger.add(fname);
-                with open(logger_fname, 'a') as f:
-                    f.write(fname + '\n');
+            if(self.is_downloading):
+                if(not is_url(url)):
+                    raise Exception("invalid ts url");
+                fname += ".ts";
+                if((fname in logger) or os.path.exists(fname)):
+                    pass;
+                else:
+                    with open(fname, 'wb') as f:
+                        r = requests.get(url, stream = True);
+                        for chunk in r.iter_content(chunk_size = 1):
+                            f.write(chunk);
+                    #     f.write(requests.get(url).content);
+                    logger.add(fname);
+                    with open(logger_fname, 'a') as f:
+                        f.write(fname + '\n');
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
+            self.is_downloading = False;
             exit();
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::write_bin(): %s\033[0m" % e);
@@ -145,13 +150,19 @@ class m3u8:
                 for x in logger:
                     f.write(x + '\n');
             for i in range(toturlcnt):
-                th = myThread(target = self.write_bin, args = (splitted_src[i], "%06d"%(i), logger, logger_fname));
-                th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 12, downloaded_cnt));
-                th_supervisor_list.append(th_supervisor);
-                th.start();
-                th_supervisor.start();
+                if(self.is_downloading):
+                    th = myThread(target = self.write_bin, args = (splitted_src[i], "%06d"%(i), logger, logger_fname));
+                    th_supervisor = myThread(target = supervisor, args = (th, current_dlcnt, 12, downloaded_cnt));
+                    th_supervisor_list.append(th_supervisor);
+                    th.start();
+                    th_supervisor.start();
+                else:
+                    break;
             for th_supervisor in th_supervisor_list:
-                th_supervisor.join();
+                if(self.is_downloading):
+                    th_supervisor.join();
+                else:
+                    break;
             if(len(self.retry_pool) > 0):
                 print("\nretrying failed items one more time...");
                 th_supervisor_list = [];
@@ -167,7 +178,7 @@ class m3u8:
             self.is_downloading = False;
             progbar_thread.join();
             os.chdir("..");
-            print("\ndownload done, stitching into one file...");
+            print("\ndownload completed, stitching into one file...");
             with open(fname, 'wb') as f:
                 x_name_list = [];
                 for (root, dirs, files) in os.walk(tmp_dl_dir):
@@ -180,13 +191,15 @@ class m3u8:
                 for x_name in x_name_list:
                     with open(x_name, 'rb') as fx:
                         f.write(fx.read());
-            print("\033[32mdone\033[0m");
+            print("\033[32mcompleted\033[0m");
             shutil.rmtree(tmp_dl_dir);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
+            self.is_downloading = False;
             exit();
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::download(): %s\033[0m" % e);
+            self.is_downloading = False;
             return True;
 
     def progress_bar(self, downloaded_cnt, total_cnt, ):
@@ -195,19 +208,26 @@ class m3u8:
                 length = os.get_terminal_size().columns - 2 - 5 - 1;
                 percent = downloaded_cnt[0] / total_cnt;
                 done = int(percent * length);
-                print("[", end = "");
+                # print("\r[", end = "");
+                bar = "\r[";
                 for i in range(done):
-                    print('>', end = "");
+                    # print('>', end = "");
+                    bar += '>';
                 for i in range(length-int(done)):
-                    print('-', end = "");
-                print(']', end = "");
-                print("%02.2f%%" % (percent * 100), end = "\r");
+                    # print('-', end = "");
+                    bar += '-';
+                # print(']', end = "");
+                bar += ']';
+                # print("%02.2f%%" % (percent * 100), end = "\r");
+                bar += "%02.2f%%" % (percent * 100);
+                print(bar, end = "");
                 if(downloaded_cnt[0] == total_cnt):
                     print('\n');
                     return;
-                # time.sleep(0.05);
+                time.sleep(0.05);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
+            self.is_downloading = False;
             exit();
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::progress_bar(): %s\033[0m" % e);

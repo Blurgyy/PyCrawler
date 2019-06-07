@@ -14,7 +14,11 @@ from epi.globalfunctions import *
 
 
 if(len(sys.argv) <= 1):
-	print("Usage:\n\t./convert $M3U8_FILE_NAME\n");
+	print("Usage:\n\t./convert [$M3U8_FILE_NAME, ]\n\n");
+	# print("E.g.:");
+	# print("\tconvert 1.m3u8 blabla mp4\n\t# Download the video as blabla.mp4\n\t---------------------------------------------------------")
+	# print("\tconvert 1.m3u8 blabla\n\t# Download the video as blabla.ts\n\t---------------------------------------------------------");
+	# print("\tconvert 1.m3u8 blabla.mp4\n\t# Download the video as blabla.mp4.ts\n\t# (weird, but yes, for there's no second parameter given)\n");
 # 	print(\
 # """\t\033[33m-- NOTE: i am not expecting $SAVE_VIDEO_NAME to have an
 # \t   extenson name such as '.mp4' or whatever. this script
