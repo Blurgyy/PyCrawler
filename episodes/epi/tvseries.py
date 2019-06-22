@@ -38,8 +38,9 @@ class tvseries:
     def parse_html(self, htmltext, ):
         try:
             tmp = re.findall(r'<a title="(.*?)".*?href="(.*?)"', htmltext)[0];
-            self.sname = tmp[0].replace('/', '-').strip();
+            self.sname = tmp[0].replace('/', '-').strip(' -');
             self.base_url = tmp[1].strip();
+            self._hash = self.base_url.split('/')[-1].split('.')[0];
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -78,10 +79,6 @@ class tvseries:
                 single_episodes_raw = [];
                 for x in all_episodes_raw:
                     single_episodes_raw += re.findall(r'<a.*?href=".*?".*?id="(.*?)">(.*?)</a>', x);
-                if(self.verbose):
-                    # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
-                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
-                    # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
                 for single_episode in single_episodes_raw:
                     # print(single_episode[0]);
                     self.episodes.append(episode(\
@@ -89,7 +86,22 @@ class tvseries:
                         _epname = (single_episode[1].strip()),\
                         _from_series = self, _verbose = self.verbose\
                         ));
-                    ret = True;
+                if(len(single_episodes_raw) == 0):
+                    for x in all_episodes_raw:
+                        single_episodes_raw += re.findall(r'<a.*?href="(.*?)">(.*?)</a>', x);
+                # print(single_episodes_raw);
+                # print(self.base_url);
+                if(self.verbose):
+                    # print("[%s]: %d video(s) found" % (self.sname, len(single_episodes_raw)));
+                    print("[%s]: %d url(s) found" % (self.sname, len(single_episodes_raw)));
+                    # print("%d video(s) will be downloaded" % (len(single_episodes_raw)));
+                ret = not not len(single_episodes_raw);
+                for single_episode in single_episodes_raw:
+                    self.episodes.append(episode(\
+                        _base_url = split_host(self.base_url) + "/video/" + self._hash + ".htm" + single_episode[0],\
+                        _epname = (single_episode[1].strip()),\
+                        _from_series = self, _verbose = self.verbose\
+                        ));
                 return ret;
             elif(split_host(self.base_url) == "http://www.fjisu.com"):
                 # print(content);
