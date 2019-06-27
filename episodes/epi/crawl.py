@@ -106,7 +106,7 @@ class crawler:
             try: # base_url[1]
                 targ_url = self.s_url[1] + quote(str(search_term));
                 # print(targ_url);
-                content = get_content(targ_url, headers = {'Origin': "http://www.fjisu.com"});
+                content = get_content(targ_url, headers = {'Origin': "http://www.fjisu.tv"}, html_unescape = True);
                 series_metadata_raw = re.findall(r'(\{.*?\})', content, flags = re.S);
                 for jsontext in series_metadata_raw:
                     # print("initializing tvseries: verbose = %s" % self.verbose);

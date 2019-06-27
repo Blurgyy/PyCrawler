@@ -148,10 +148,15 @@ def create_headers():
     except Exception as e:
         print("\033[1;31mglobalfunctions.py::create_headers(): %s\033[0m" % e);
         return None;
-def get_content(url, headers = create_headers(), proxies = {'http': "http://61.184.109.33:61320", 'https': "https://210.5.10.87:53281"}, timeout = 9.9, ):
+def get_content(url, headers = create_headers(), proxies = {'http': "http://61.184.109.33:61320", 'https': "https://210.5.10.87:53281"}, timeout = 9.9, html_unescape = False, ):
     try:
         content = requests.get(url, headers = headers, timeout = timeout).text;
-        return html.unescape(content.encode('latin-1', 'ignore').decode('utf-8', 'ignore'));
+        # content = content.encode('latin-1', 'ignore').decode('utf-8', 'ignore');
+        if(html_unescape):
+            return html.unescape(content.encode('latin-1', 'ignore').decode('utf-8', 'ignore'));
+            # return html.unescape(content);
+        else:
+            return content;
     except KeyboardInterrupt:
         print("\n KeyboardInterrupt, exiting");
         exit();

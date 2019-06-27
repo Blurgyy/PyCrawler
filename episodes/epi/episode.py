@@ -17,6 +17,7 @@ class episode:
             # print("initalizing episode with (%s, %s, %s), m3u8_url = %s" % (_base_url, str(_epname), _from_series, _m3u8_url));
             self.base_url = _base_url;
             self.from_series = _from_series;
+            self.dl_option = self.from_series.dl_option;
             self.epname = _epname;
             self.fname = str(self.epname);
             self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
@@ -29,7 +30,6 @@ class episode:
             self.m3u8 = m3u8(_base_url = _m3u8_url, _from_ep = self, );
             if(self.m3u8 == None):
                 raise Exception("m3u8 initalization failed");
-            self.dl_option = self.from_series.dl_option;
             self.duplicate_id = 1;
             self.verbose = _verbose;
         except KeyboardInterrupt:

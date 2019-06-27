@@ -37,9 +37,11 @@ class tvseries:
 
     def parse_html(self, htmltext, ):
         try:
-            tmp = re.findall(r'<a title="(.*?)".*?href="(.*?)"', htmltext)[0];
-            self.sname = tmp[0].replace('/', '-').strip(" -/._");
-            self.base_url = tmp[1].strip();
+            # print(htmltext);
+            tmp = re.findall(r'<a title=".*?".*?href="(.*?)".*?h2>(.*?)</h2', htmltext)[0];
+            # print(tmp);
+            self.sname = tmp[1].replace('/', '-').strip(" -/._");
+            self.base_url = tmp[0].strip();
             self._hash = self.base_url.split('/')[-1].split('.')[0];
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -103,14 +105,14 @@ class tvseries:
                         _from_series = self, _verbose = self.verbose\
                         ));
                 return ret;
-            elif(split_host(self.base_url) == "http://www.fjisu.com"):
+            elif(split_host(self.base_url) == "http://www.fjisu.tv"):
                 # print(content);
                 all_episodes_raw = re.findall(r'(<ul class="details-con2-list">.*?</ul|<ul class="details-con2-list">.*?</div)', content, flags = re.S)[0];
                 # print(all_episodes_raw);
                 # print("all_episodes_raw is fine");
                 single_episodes_raw = re.findall(r'<a.*?href="(.*?)" title="(.*?)">', all_episodes_raw);
                 single_episodes_raw = list(reversed(single_episodes_raw));
-                # print("single_episodes_raw is fine");
+                print("single_episodes_raw is fine");
                 # print("single_episodes_raw = %s" % single_episodes_raw);
                 req_m3u8_urls = re.findall(r'src="(.*?%s.*?)"' % self._hash, get_content(self.base_url + single_episodes_raw[0][0]));
                 # print(req_m3u8_urls);
