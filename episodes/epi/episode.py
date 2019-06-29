@@ -19,6 +19,7 @@ class episode:
             self.from_series = _from_series;
             self.dl_option = self.from_series.dl_option;
             self.epname = _epname;
+            self.verbose = _verbose;
             self.fname = str(self.epname);
             self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
             self._hash = HASH;
@@ -31,7 +32,6 @@ class episode:
             if(self.m3u8 == None):
                 raise Exception("m3u8 initalization failed");
             self.duplicate_id = 1;
-            self.verbose = _verbose;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -66,6 +66,7 @@ class episode:
     def download(self, ):   # as *.m3u8, returns True if a redownload action needs to be performed
         try:
             if(not os.path.exists(self.from_series.sname)):
+                # print("directory created: %s" % (self.from_series.sname));
                 os.makedirs(self.from_series.sname);
             if(os.path.exists(self.fpath)):
                 if(self.dl_option == 'n'):
