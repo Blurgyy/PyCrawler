@@ -75,8 +75,9 @@ class tvseries:
                         print("no such folder as [%s], file structure unchanged" % (self.sname));
                 return ret;
             self.episodes = [];
-            content = get_content(self.base_url);
+            # content = get_content(self.base_url);
             if(split_host(self.base_url) == "https://91mjw.com"):
+                content = get_content(self.base_url);
                 all_episodes_raw = re.findall(r'<div id="video_list_li" class="video_list_li">.*?</div>', content, flags = re.S);
                 single_episodes_raw = [];
                 for x in all_episodes_raw:
@@ -106,13 +107,14 @@ class tvseries:
                         ));
                 return ret;
             elif(split_host(self.base_url) == "http://www.fjisu.tv"):
+                content = get_content(self.base_url, html_unescape = True);
                 # print(content);
                 all_episodes_raw = re.findall(r'(<ul class="details-con2-list">.*?</ul|<ul class="details-con2-list">.*?</div)', content, flags = re.S)[0];
                 # print(all_episodes_raw);
                 # print("all_episodes_raw is fine");
                 single_episodes_raw = re.findall(r'<a.*?href="(.*?)" title="(.*?)">', all_episodes_raw);
                 single_episodes_raw = list(reversed(single_episodes_raw));
-                print("single_episodes_raw is fine");
+                # print("single_episodes_raw is fine");
                 # print("single_episodes_raw = %s" % single_episodes_raw);
                 req_m3u8_urls = re.findall(r'src="(.*?%s.*?)"' % self._hash, get_content(self.base_url + single_episodes_raw[0][0]));
                 # print(req_m3u8_urls);
