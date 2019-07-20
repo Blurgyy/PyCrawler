@@ -187,7 +187,7 @@ class tvseries:
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
             if(os.listdir(self.sname)):
-                print("\033[1;33mrenewing modify time for downloaded items...\033[0m", end = "\r");
+                print("\033[1;33msorting downloaded items...\033[0m");
                 for ep in self.episodes:
                     ep.renew_mtime();
             else:
