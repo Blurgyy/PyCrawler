@@ -256,6 +256,7 @@ class m3u8:
                 percent = self.success_threads / len(self.url_pool) * 100;
                 # print(percent);
                 print("\r [%s] %02.2f%%" % (bar(self.success_threads, len(self.url_pool), length), percent), end = '\r');
+                time.sleep(0.3);
             percent = self.success_threads / len(self.url_pool) * 100;
             print(" [%s] %02.2f%%" % (bar(self.success_threads, len(self.url_pool), length), percent));
         except KeyboardInterrupt:
