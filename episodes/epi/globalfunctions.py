@@ -179,3 +179,19 @@ class myThread(threading.Thread):
         except Exception as e:
             print("\033[1;31mglobalfunctions.py::myThread::fetch_result(): %s\033[0m" % e);
             return None;
+
+def supervisor(th, opening_thcnt, maximum_thcnt, finished_thcnt, ):
+    # where opening_thcnt and finished_thcnt are **list**s, while maximum_thcnt is an **integer** 
+    try:
+        while(opening_thcnt[0] >= maximum_thcnt):
+            pass;
+        opening_thcnt[0] += 1;
+        # print("downloading %d items.." % opening_thcnt[0]);
+        th.join();
+        opening_thcnt[0] -= 1;
+        finished_thcnt[0] += 1;
+    except KeyboardInterrupt:
+        print("\n KeyboardInterrupt, exiting");
+        exit();
+    except Exception as e:
+        print("\033[1;31mglobalfunctions.py::supervisor(): %s\033[0m" % e);
