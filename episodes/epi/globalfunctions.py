@@ -9,6 +9,7 @@ import random
 import socket
 import struct
 import sys
+import inspect
 import threading
 from urllib.parse import unquote
 
@@ -33,9 +34,9 @@ def split_host(x):
 def split_fname(x):
     if(x == None):
         return None;
-    ret = "";
     full_fname = x.split('/')[-1];
     splt = full_fname.split('.');
+    ret = "";
     for i in range(len(splt)):
         if(i == len(splt) - 1):
             continue;
@@ -44,27 +45,23 @@ def split_fname(x):
         else:
             ret += '.' + splt[i];
     return ret;
-def supervisor(th, opening_thcnt, maximum_thcnt, finished_thcnt, ):
-    # where opening_thcnt and finished_thcnt are **list**s, while maximum_thcnt is an **integer** 
-    try:
-        while(opening_thcnt[0] >= maximum_thcnt):
-            pass;
-        opening_thcnt[0] += 1;
-        # print("downloading %d items.." % opening_thcnt[0]);
-        th.join();
-        opening_thcnt[0] -= 1;
-        finished_thcnt[0] += 1;
-    except KeyboardInterrupt:
-        print("\n KeyboardInterrupt, exiting");
-        exit();
-    except Exception as e:
-        print("\033[1;31mglobalfunctions.py::supervisor(): %s\033[0m" % e);
+def current_fn_name():
+    return inspect.stack()[1][3];
 def randch():
     return random.choice("1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM");
 def randstring(length = 6, ):
     ret = "";
     for i in range(length):
         ret += randch();
+    return ret;
+def bar(finished, total, length, ):
+    ret = "";
+    go0 = int(finished / total * length);
+    go1 = length - go0;
+    for i in range(go0):
+        ret += '>';
+    for i in range(go1):
+        ret += ' ';
     return ret;
 def read_terminal_args():
     try:
@@ -164,10 +161,21 @@ def get_content(url, headers = create_headers(), proxies = {'http': "http://61.1
         print("\033[1;31mglobalfunctions.py::get_content(): %s\033[0m" % e);
         return None;
 
+###
 class myThread(threading.Thread):
+    def __init__(self, target, args=(), ):
+        super(myThread, self).__init__();
+        self.func = target;
+        self.args = args;
+    def run(self, ):
+        self.result = self.func(*self.args);
     def fetch_result(self, ):
         try:
+            threading.Thread.join(self);
             return self.result;
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
         except Exception as e:
             print("\033[1;31mglobalfunctions.py::myThread::fetch_result(): %s\033[0m" % e);
             return None;
