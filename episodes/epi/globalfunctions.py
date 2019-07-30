@@ -3,6 +3,7 @@
 __author__ = "Blurgy";
 
 import requests
+import os
 import re
 import html
 import random
@@ -34,12 +35,12 @@ def split_host(x):
 def split_fname(x):
     if(x == None):
         return None;
-    full_fname = x.split('/')[-1];
+    full_fname = x.split(os.sep)[-1];
+    # print(full_fname);
+    # input();
     splt = full_fname.split('.');
     ret = "";
     for i in range(len(splt) - 1):
-        # if(i == len(splt) - 1):
-        #     continue;
         if(i == 0):
             ret += splt[i];
         else:

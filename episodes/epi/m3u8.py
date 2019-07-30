@@ -94,17 +94,19 @@ class m3u8:
         self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
         self.cache_dir = None;
         if(os.name == "nt"):
-            self.cache_dir = os.path.join(".", "cache");
+            self.cache_dir = os.path.join(os.getcwd(), "cache");
         elif(os.name == "posix"):
             self.cache_dir = os.path.join(env["HOME"] + "/.cache/blurgy/m3u8Download", self.video_idname);
-        self.cache_fname = self.update_fname(self.cache_dir, self.video_idname, increment = False);
+        self.cache_fname = os.path.join(self.cache_dir, self.video_idname);
+        # print(self.cache_fname);
+        # input();
         self.dl_fname = None;
 
         fn_name = "m3u8.py::m3u8::download()";
         try:
             if(dldir == None):
                 if(os.name == "nt"):
-                    dldir = ".";
+                    dldir = os.getcwd();
                 elif(os.name == "posix"):
                     dldir = os.path.join(env["HOME"], "/Downloads/m3u8Download");
             if(not os.path.exists(dldir)):
@@ -237,7 +239,7 @@ class m3u8:
         except Exception as e:
             print("%s: %s" % (fn_name, e));
 
-    def update_fname(self, fpath = None, fname = None, extname = ".ts", increment = True):
+    def update_fname(self, fpath = None, fname = None, extname = ".ts", ):
         fn_name = "m3u8.py::m3u8::update_fname()";
         try:
             if(not os.path.exists(fpath)):
@@ -246,11 +248,10 @@ class m3u8:
             if(fname == None):
                 fname = self.video_idname;
             ret = fname;
-            if(increment):
-                idx = 1;
-                while(os.path.exists(os.path.join(fpath, ret + extname))):
-                    idx += 1;
-                    ret = fname + " (%d)"%(idx);
+            idx = 1;
+            while(os.path.exists(os.path.join(fpath, ret + extname))):
+                idx += 1;
+                ret = fname + " (%d)"%(idx);
             return fpath + '/' + ret + extname;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -269,7 +270,10 @@ class m3u8:
             th.join();
             self.running_threads -= 1;
             if(th.fetch_result() == False):
-                os.remove(th.args[1]);
+                try:
+                    os.remove(th.args[1]);
+                except Exception as e:
+                    pass;
                 # print("removed %s" % th.args[1]);
                 # self.retry_pool.append(myThread(target = th.func, args = th.args));
             else:
