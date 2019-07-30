@@ -5,7 +5,6 @@ __author__ = "Blurgy";
 import re
 import os
 import pickle
-import chardet
 from urllib.parse import quote
 from .tvseries import tvseries
 from .globalfunctions import *

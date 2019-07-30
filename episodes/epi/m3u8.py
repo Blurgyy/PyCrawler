@@ -7,6 +7,7 @@ from os import environ as env
 import time
 import shutil
 import requests
+import ffmpy
 from urllib.parse import unquote
 from .globalfunctions import *
 
@@ -35,7 +36,9 @@ class m3u8:
             self.maximum_threads = None;
             self.success_threads = None;
             self.video_fname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
-            self.cachedir = env["HOME"] + "/.cache/blurgy/m3u8Download" + "/" + self.video_fname;
+            self.cache_dir = env["HOME"] + "/.cache/blurgy/m3u8Download" + "/" + self.video_fname;
+            self.cache_fname = None;
+            self.dl_fname = None;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -92,14 +95,20 @@ class m3u8:
             print("\033[1;31mm3u8.py::m3u8::unify(): %s\033[0m" % e);
             return None;
 
-    def download(self, dldir = None):
+    def download(self, dldir = None): # dldir: absolute path
         fn_name = "m3u8.py::m3u8::download()";
         try:
+            if(dldir == None):
+                dldir = env["HOME"] + "/Downloads/m3u8Download";
+            if(not os.path.exists(dldir)):
+                os.makedirs(dldir);
+            self.dl_fname = self.update_fname(dldir, self.video_fname);
             while(self.success_threads != len(self.url_pool)):
                 print("caching..");
                 self.cache();
             print("-- cache complete, concatenating..");
-            self.concatenate(dldir);
+            self.concatenate();
+            shutil.copy(self.cache_fname, self.dl_fname);
             print("-- concatenate complete, file saved at [%s]" % (self.dl_fname))
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -108,6 +117,20 @@ class m3u8:
             print("%s: %s" % (fn_name, e));
             return False;
 
+    def hold_dir(self, directory, ):
+        fn_name = "m3u8.py::m3u8::hold_dir()";
+        try:
+            while(self.is_downloading):
+                if(not os.path.exists(directory)):
+                    os.makedirs(directory);
+        except KeyboardInterrupt:
+            os.remove(target_file);
+            self.is_downloading = False;
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("%s: %s" % (fn_name, e));
+            return False;
 
     def write_bin(self, url, target_file, ):
         fn_name = "m3u8.py::m3u8::write_bin()";
@@ -129,21 +152,21 @@ class m3u8:
     def cache(self, ):
         fn_name = "m3u8.py::m3u8::cache()";
         try:
-            if(not os.path.exists(self.cachedir)):
-                os.makedirs(self.cachedir);
-            os.chdir(self.cachedir);
+            if(not os.path.exists(self.cache_dir)):
+                os.makedirs(self.cache_dir);
+            os.chdir(self.cache_dir);
             self.unify();
             for line in self.content.splitlines():
                 if(is_url(line) and is_ts(line)):
                     self.url_pool.append(line);
-            if(os.path.exists("self.m3u8")):
-                excontent = open("self.m3u8").read();
+            if(os.path.exists(split_fname(self.video_fname) + ".m3u8")):
+                excontent = open(split_fname(self.video_fname) + ".m3u8").read();
                 if(excontent != self.content):
                     os.chdir("..");
                     shutil.rmtree(self.video_fname);
                     os.makedirs(self.video_fname);
-                    os.chdir(self.cachedir);
-            with open("self.m3u8", 'w') as f:
+                    os.chdir(self.cache_dir);
+            with open(split_fname(self.video_fname) + ".m3u8", 'w') as f:
                 f.write(self.content);
 
             self.is_downloading = True;
@@ -152,6 +175,8 @@ class m3u8:
             self.success_threads = 0;
             progbar = myThread(target = self.progressbar, args = ());
             progbar.start();
+            holddir = myThread(target = self.hold_dir, args = (self.cache_dir, ));
+            holddir.start();
             self.supervisor_list = [];
             for i in range(len(self.url_pool)):
                 url = self.url_pool[i];
@@ -170,6 +195,7 @@ class m3u8:
             for sup in self.supervisor_list:
                 sup.join();
             self.is_downloading = False;
+            holddir.join();
             progbar.join();
         except KeyboardInterrupt:
             self.is_downloading = False;
@@ -178,21 +204,19 @@ class m3u8:
         except Exception as e:
             print("%s: %s" % (fn_name, e));
 
-    def concatenate(self, dldir = None, ):
+    def concatenate(self, ):
         fn_name = "m3u8.py::m3u8::concatenate()";
         try:
             if(self.is_downloading):
                 print("download not finished, abort concatenating");
                 return;
-            if(dldir == None):
-                dldir = env["HOME"] + "/Downloads/m3u8Download";
-            if(not os.path.exists(dldir)):
-                os.makedirs(dldir);
-            fname = self.update_fname(dldir, self.video_fname);
-            self.dl_fname = fname;
 
+            fname = self.update_fname(self.cache_dir, self.video_fname);
+            self.cache_fname = fname;
+            if(os.path.exists(self.cache_fname)):
+                return;
             fd = open(fname, 'wb');
-            os.chdir(self.cachedir);
+            os.chdir(self.cache_dir);
             for root, dirs, files in os.walk('.'):
                 files.sort();
                 for file in files:
