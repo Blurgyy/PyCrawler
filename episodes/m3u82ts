@@ -28,8 +28,8 @@ if(len(sys.argv) == 3):
 	dldir = sys.argv[2];
 	if(not os.path.exists(dldir)):
 		os.makedirs(dldir);
-	os.chdir(dldir);
-	dldir = os.getcwd();
+	# os.chdir(dldir);
+	dldir = os.path.join(os.getcwd(), dldir);
 
 x = epi.m3u8(_from_file = from_file);
 x.download(dldir);

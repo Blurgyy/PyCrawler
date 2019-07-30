@@ -37,9 +37,9 @@ def split_fname(x):
     full_fname = x.split('/')[-1];
     splt = full_fname.split('.');
     ret = "";
-    for i in range(len(splt)):
-        if(i == len(splt) - 1):
-            continue;
+    for i in range(len(splt) - 1):
+        # if(i == len(splt) - 1):
+        #     continue;
         if(i == 0):
             ret += splt[i];
         else:
