@@ -1,3 +1,7 @@
+# Videos
+*.ts
+*.mp4
+
 # Compressed files
 *.7z
 *.zip
@@ -11,6 +15,7 @@
 # temporary files
 tmp.*
 *.tmp
+cache/
 
 # HTTP Live Stream(HLS) files
 *.m3u8
