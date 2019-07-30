@@ -28,20 +28,6 @@ class m3u8:
                     self.content = open(self.from_file).read();
                 else:
                     raise Exception("%s not found" % self.from_file);
-            self.url_pool = [];
-            # self.retry_pool = [];
-            self.is_downloading = False;
-            self.running_threads = None;
-            self.maximum_threads = None;
-            self.success_threads = None;
-            self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
-            self.cache_dir = None;
-            if(os.name == "nt"):
-                self.cache_dir = os.path.join(".", "cache");
-            elif(os.name == "posix"):
-                self.cache_dir = os.path.join(env["HOME"] + "/.cache/blurgy/m3u8Download", self.video_idname);
-            self.cache_fname = self.update_fname(self.cache_dir, self.video_idname, increment = False);
-            self.dl_fname = None;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -99,6 +85,21 @@ class m3u8:
             return None;
 
     def download(self, dldir = None): # dldir: absolute path
+        self.url_pool = [];
+        # self.retry_pool = [];
+        self.is_downloading = False;
+        self.running_threads = None;
+        self.maximum_threads = None;
+        self.success_threads = None;
+        self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
+        self.cache_dir = None;
+        if(os.name == "nt"):
+            self.cache_dir = os.path.join(".", "cache");
+        elif(os.name == "posix"):
+            self.cache_dir = os.path.join(env["HOME"] + "/.cache/blurgy/m3u8Download", self.video_idname);
+        self.cache_fname = self.update_fname(self.cache_dir, self.video_idname, increment = False);
+        self.dl_fname = None;
+
         fn_name = "m3u8.py::m3u8::download()";
         try:
             if(dldir == None):
@@ -241,13 +242,13 @@ class m3u8:
         try:
             if(not os.path.exists(fpath)):
                 os.makedirs(fpath);
-            os.chdir(fpath);
+            # os.chdir(fpath);
             if(fname == None):
                 fname = self.video_idname;
             ret = fname;
             if(increment):
                 idx = 1;
-                while(os.path.exists(ret + extname)):
+                while(os.path.exists(os.path.join(fpath, ret + extname))):
                     idx += 1;
                     ret = fname + " (%d)"%(idx);
             return fpath + '/' + ret + extname;
