@@ -36,7 +36,7 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisode.py::episode::__init__(): %s\033[0m" % e);
+            print("episode.py::episode::__init__(): %s" % e);
 
     def getvid(self, ):
         try:
@@ -60,7 +60,7 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisode.py::episode::getvid(): %s\033[0m" % e);
+            print("episode.py::episode::getvid(): %s" % e);
             return None;
 
     def download(self, ):   # as *.m3u8, returns True if a redownload action needs to be performed
@@ -71,7 +71,7 @@ class episode:
             if(os.path.exists(self.fpath)):
                 if(self.dl_option == 'n'):
                     if(self.verbose):
-                        print("-- \033[33m[%s] duplicated, \033[0m" % (self.fpath), end = "");
+                        print("-- [%s] duplicated, " % (self.fpath), end = "");
                     self.duplicate_id += 1;
                     self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                     self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
@@ -80,14 +80,14 @@ class episode:
                         self.fname = str(self.epname) + "(%d)" % (self.duplicate_id);
                         self.fpath = self.from_series.sname + '/' + self.fname + ".m3u8";
                     if(self.verbose):
-                        print("\033[33mdownloading as [%s]\033[0m" % (self.fpath));
+                        print("downloading as [%s]" % (self.fpath));
                 elif(self.dl_option == 'o'):
                     if(self.verbose):
-                        print("-- \033[33m[%s] duplicated, overwriting\033[0m" % (self.fpath));
+                        print("-- [%s] duplicated, overwriting" % (self.fpath));
                     do_nothing();
                 elif(self.dl_option == 's'):
                     if(self.verbose):
-                        print("-- \033[33m[%s] duplicated, skipping\033[0m" % (self.fpath));
+                        print("-- [%s] duplicated, skipping" % (self.fpath));
                     return False;
             with open(self.fpath, 'w') as f:
                 do_nothing();
@@ -96,7 +96,7 @@ class episode:
                 with open(self.fpath, 'wb') as f:
                     f.write(self.m3u8.content.encode());
                 if(self.verbose):
-                    print("-- \033[32m[%s] episode [%s] downloaded as [%s]\033[0m" % (self.from_series.sname, str(self.epname), self.fpath));
+                    print("-- [%s] episode [%s] downloaded as [%s]" % (self.from_series.sname, str(self.epname), self.fpath));
                 return False;
             else:
                 if(os.path.exists(self.fpath)):
@@ -110,7 +110,7 @@ class episode:
         except Exception as e:
             if(os.path.exists(self.fpath)):
                 os.remove(self.fpath);
-            print("\033[1;31mepisode.py::episode::download(): %s\033[0m" % e);
+            print("episode.py::episode::download(): %s" % e);
             return True;
 
     def renew_mtime(self, ):    # renew file's last modified time (if the file exists) to current time
@@ -124,5 +124,5 @@ class episode:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mepisode.py::episode::renew_mtime(): %s\033[0m" % e);
+            print("episode.py::episode::renew_mtime(): %s" % e);
             return True;

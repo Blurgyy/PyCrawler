@@ -34,7 +34,7 @@ class m3u8:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mm3u8.py::m3u8::__init__(): %s\033[0m" % e);
+            print("m3u8.py::m3u8::__init__(): %s" % e);
 
     def unify(self, url = None, ):
         # download and unify the m3u8 document to a universal version (i.e. playable)
@@ -87,7 +87,7 @@ class m3u8:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mm3u8.py::m3u8::unify(): %s\033[0m" % e);
+            print("m3u8.py::m3u8::unify(): %s" % e);
             return None;
 
     def download(self, dldir = None): # dldir: absolute path
@@ -177,15 +177,15 @@ class m3u8:
                 os.makedirs(self.cache_dir);
             origin_dir = os.getcwd();
             os.chdir(self.cache_dir);
-            if(os.path.exists(self.video_idname + ".m3u8")):
-                excontent = open(self.video_idname + ".m3u8").read();
-                if(excontent != self.content):
-                    os.chdir("..");
-                    shutil.rmtree(self.video_idname);
-                    os.makedirs(self.video_idname);
-                    os.chdir(self.cache_dir);
-            with open(self.video_idname + ".m3u8", 'w') as f:
-                f.write(self.content);
+            # if(os.path.exists(self.video_idname + ".m3u8")):
+            #     excontent = open(self.video_idname + ".m3u8").read();
+            #     if(excontent != self.content):
+            #         os.chdir("..");
+            #         shutil.rmtree(self.video_idname);
+            #         os.makedirs(self.video_idname);
+            #         os.chdir(self.cache_dir);
+            # with open(self.video_idname + ".m3u8", 'w') as f:
+            #     f.write(self.content);
 
             self.is_downloading = True;
             self.running_threads = 0;

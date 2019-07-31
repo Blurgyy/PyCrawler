@@ -33,7 +33,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::__init__(): %s\033[0m" % e);
+            print("tvseries.py::tvseries::__init__(): %s" % e);
 
     def parse_html(self, htmltext, ):
         try:
@@ -47,7 +47,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::parse_html(): %s\033[0m" % e);
+            print("tvseries.py::tvseries::parse_html(): %s" % e);
 
     def parse_json(self, jsontext, ):
         try:
@@ -60,7 +60,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::parse_json(): %s\033[0m" % e);
+            print("tvseries.py::tvseries::parse_json(): %s" % e);
 
     def process(self, ):    # returns True if one or more download actions need to be performed, False otherwise
         try:
@@ -69,7 +69,7 @@ class tvseries:
                 if(os.path.exists(self.sname)):
                     shutil.rmtree(self.sname);
                     if(self.verbose):
-                        print("\033[1;33mok deleted folder: [%s]\033[0m" % (self.sname));
+                        print("ok deleted folder: [%s]" % (self.sname));
                 else:
                     if(self.verbose):
                         print("no such folder as [%s], file structure unchanged" % (self.sname));
@@ -165,7 +165,7 @@ class tvseries:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::process(): %s\033[0m" % e);
+            print("tvseries.py::tvseries::process(): %s" % e);
             return ret;
 
     def download(self, ):
@@ -187,14 +187,14 @@ class tvseries:
             for th_supervisor in th_supervisor_list:
                 th_supervisor.join();
             if(os.listdir(self.sname)):
-                print("\033[1;33msorting downloaded items...\033[0m");
+                print("sorting downloaded items...");
                 for ep in self.episodes:
                     ep.renew_mtime();
             else:
                 os.rmdir(self.sname);
-            print("\033[1;32mall pending downloads have completed             \033[0m");
+            print("all pending downloads have completed");
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mtvseries.py::tvseries::download(): %s\033[0m" % e);
+            print("tvseries.py::tvseries::download(): %s" % e);

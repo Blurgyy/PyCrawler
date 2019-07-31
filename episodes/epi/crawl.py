@@ -34,7 +34,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::__init__(): %s\033[0m", e);
+            print("crawl.py::crawler::__init__(): %s", e);
 
     def run(self, dump = False, load = False):
         try:
@@ -78,7 +78,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::run(): %s\033[0m", e);
+            print("crawl.py::crawler::run(): %s", e);
 
     def search(self, ):
         try:
@@ -100,7 +100,7 @@ class crawler:
                 print("\n KeyboardInterrupt, exiting");
                 exit();
             except Exception as e:
-                print("\033[1;31m%s, skipping\033[0m" % e);
+                print("%s, skipping" % e);
 
             try: # base_url[1]
                 targ_url = self.s_url[1] + quote(str(search_term));
@@ -118,13 +118,13 @@ class crawler:
                 print("\n KeyboardInterrupt, exiting");
                 exit();
             except Exception as e:
-                print("\033[1;31m%s, skipping\033[0m" % e);
+                print("%s, skipping" % e);
             return self.series;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::search(): %s\033[0m" % e);
+            print("crawl.py::crawler::search(): %s" % e);
             return None;
 
     def select(self, ):
@@ -138,12 +138,12 @@ class crawler:
                 return self.Id;
             else:
                 if(self.verbose):
-                    print("Search Results(\033[1m%d\033[0m):" % len(self.series));
+                    print("Search Results(%d):" % len(self.series));
                     for i in range(len(self.series)):
-                        print("\t\033[1;32m%02d\033[0m. \033[4m%s\033[0m" % (i+1, self.series[i].sname));
+                        print("\t%02d. %s" % (i+1, self.series[i].sname));
             entryid = "";
             while(len(entryid) == 0):
-                print("select by entering the id of the desired video(s) (enter \033[1;34m!\033[0m to abort): ", end = "");
+                print("select by entering the id of the desired video(s) (enter '!' to abort): ", end = "");
                 entryid = input().strip();
                 entrylist = entryid.split();
                 for i in entrylist:
@@ -179,7 +179,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::select(): %s\033[0m" % e);
+            print("crawl.py::crawler::select(): %s" % e);
             return None;
 
     def write_select_list(self, ):
@@ -207,7 +207,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::write_select_list(): %s\033[0m" % e);
+            print("crawl.py::crawler::write_select_list(): %s" % e);
             return None;
 
     def download(self, ):
@@ -226,7 +226,7 @@ class crawler:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mcrawl.py::crawler::download(): %s\033[0m" % e);
+            print("crawl.py::crawler::download(): %s" % e);
 
     # def close(self, ):
     #     try:
@@ -238,7 +238,7 @@ class crawler:
     #         print("\n KeyboardInterrupt, exiting");
     #         exit();
     #     except Exception as e:
-    #         print("\033[1;31mcrawl.py::crawler::close(): %s\033[0m" % e);
+    #         print("crawl.py::crawler::close(): %s" % e);
 
 
 if(__name__ == "__main__"):
@@ -252,4 +252,4 @@ if(__name__ == "__main__"):
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("\033[1;31m???????, %s\033[0m" % e);
+        print("???????, %s" % e);

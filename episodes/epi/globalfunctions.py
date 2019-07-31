@@ -99,10 +99,10 @@ def read_terminal_args():
                 if(sys.argv[i].isdigit()):
                     _preselect = int(sys.argv[i]) - 1;
                     if(_preselect < 0):
-                        print("\033[1;31m%s\033[0m: invalid parameter" % (sys.argv[i]));
+                        print("%s: invalid parameter" % (sys.argv[i]));
                         _preselect = None;
                 else:
-                    print("\033[1;31m%s\033[0m: not a integer" % (sys.argv[i]));
+                    print("%s: not a integer" % (sys.argv[i]));
                 ret['_preselect'] = _preselect;
             elif(sys.argv[i] == "-n"):  # `-n` save with a (n)ew name
                 ret['_dl_option'] = 'n';
@@ -129,7 +129,7 @@ def read_terminal_args():
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("\033[1;31mglobalfunctions.py::read_terminal_args(): %s\033[0m" % e);
+        print("globalfunctions.py::read_terminal_args(): %s" % e);
         return default;
 def create_headers():
     try:
@@ -144,7 +144,7 @@ def create_headers():
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("\033[1;31mglobalfunctions.py::create_headers(): %s\033[0m" % e);
+        print("globalfunctions.py::create_headers(): %s" % e);
         return None;
 def get_content(url, headers = create_headers(), proxies = {'http': "http://61.184.109.33:61320", 'https': "https://210.5.10.87:53281"}, timeout = 9.9, html_unescape = False, ):
     try:
@@ -159,7 +159,7 @@ def get_content(url, headers = create_headers(), proxies = {'http': "http://61.1
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("\033[1;31mglobalfunctions.py::get_content(): %s\033[0m" % e);
+        print("globalfunctions.py::get_content(): %s" % e);
         return None;
 
 ###
@@ -178,7 +178,7 @@ class myThread(threading.Thread):
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("\033[1;31mglobalfunctions.py::myThread::fetch_result(): %s\033[0m" % e);
+            print("globalfunctions.py::myThread::fetch_result(): %s" % e);
             return False;
 
 def supervisor(th, opening_thcnt, maximum_thcnt, finished_thcnt, ):
@@ -195,4 +195,4 @@ def supervisor(th, opening_thcnt, maximum_thcnt, finished_thcnt, ):
         print("\n KeyboardInterrupt, exiting");
         exit();
     except Exception as e:
-        print("\033[1;31mglobalfunctions.py::supervisor(): %s\033[0m" % e);
+        print("globalfunctions.py::supervisor(): %s" % e);
