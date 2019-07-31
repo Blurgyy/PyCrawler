@@ -88,16 +88,20 @@ class m3u8:
         self.url_pool = [];
         # self.retry_pool = [];
         self.is_downloading = False;
-        self.running_threads = None;
-        self.maximum_threads = None;
-        self.success_threads = None;
+        self.running_threads = 0;
+        self.maximum_threads = 4;
+        self.success_threads = 0;
         self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
         self.cache_dir = None;
         if(os.name == "nt"):
             self.cache_dir = os.path.join(os.getcwd(), "cache");
         elif(os.name == "posix"):
             self.cache_dir = os.path.join(env["HOME"] + "/.cache/blurgy/m3u8Download", self.video_idname);
-        self.cache_fname = os.path.join(self.cache_dir, self.video_idname);
+        self.cache_fname = os.path.join(self.cache_dir, self.video_idname + ".ts");
+        self.unify();
+        for line in self.content.splitlines():
+            if(is_url(line) and is_ts(line)):
+                self.url_pool.append(line);
         # print(self.cache_fname);
         # input();
         self.dl_fname = None;
@@ -108,12 +112,15 @@ class m3u8:
                 if(os.name == "nt"):
                     dldir = os.getcwd();
                 elif(os.name == "posix"):
-                    dldir = os.path.join(env["HOME"], "/Downloads/m3u8Download");
+                    dldir = os.path.join(env["HOME"], "Downloads/m3u8Download");
             if(not os.path.exists(dldir)):
                 os.makedirs(dldir);
             self.dl_fname = self.update_fname(dldir, self.video_idname);
             while(self.success_threads != len(self.url_pool)):
-                print("caching..");
+                if(self.success_threads == 0):
+                    print("caching ..");
+                else:
+                    print("validating: [%d / %d] .." % (self.success_threads, len(self.url_pool)))
                 self.cache();
             print("-- cache complete, concatenating..");
             self.concatenate();
@@ -153,7 +160,7 @@ class m3u8:
             os.remove(target_file);
             self.is_downloading = False;
             print("\n KeyboardInterrupt, exiting");
-            exit();
+            return False;
         except Exception as e:
             os.remove(target_file);
             print("%s: %s" % (fn_name, e));
@@ -164,11 +171,8 @@ class m3u8:
         try:
             if(not os.path.exists(self.cache_dir)):
                 os.makedirs(self.cache_dir);
+            origin_dir = os.getcwd();
             os.chdir(self.cache_dir);
-            self.unify();
-            for line in self.content.splitlines():
-                if(is_url(line) and is_ts(line)):
-                    self.url_pool.append(line);
             if(os.path.exists(self.video_idname + ".m3u8")):
                 excontent = open(self.video_idname + ".m3u8").read();
                 if(excontent != self.content):
@@ -181,7 +185,7 @@ class m3u8:
 
             self.is_downloading = True;
             self.running_threads = 0;
-            self.maximum_threads = 4;
+            self.maximum_threads = 6;
             self.success_threads = 0;
             progbar = myThread(target = self.progressbar, args = ());
             progbar.start();
@@ -196,17 +200,11 @@ class m3u8:
                 self.supervisor_list.append(sup);
             for sup in self.supervisor_list:
                 sup.join();
-            ### Retry
-            # self.supervisor_list = [];
-            # for th in self.retry_pool:
-            #     sup = myThread(target = self.supervisor, args = (th, ));
-            #     sup.start();
-            #     self.supervisor_list.append(sup);
-            # for sup in self.supervisor_list:
-            #     sup.join();
+
             self.is_downloading = False;
             holddir.join();
             progbar.join();
+            os.chdir(origin_dir);
         except KeyboardInterrupt:
             self.is_downloading = False;
             print("\n KeyboardInterrupt, exiting");
@@ -225,12 +223,13 @@ class m3u8:
                 return;
             fname = self.cache_fname;
             fd = open(fname, 'wb');
-            os.chdir(self.cache_dir);
-            for root, dirs, files in os.walk('.'):
+            # os.chdir(self.cache_dir);
+            for root, dirs, files in os.walk(self.cache_dir):
                 files.sort();
                 for file in files:
                     if(re.match(r'\d{9}', file)):
-                        with open(file, 'rb') as f:
+                        abspath = os.path.join(root, file);
+                        with open(abspath, 'rb') as f:
                             fd.write(f.read());
             fd.close();
         except KeyboardInterrupt:
@@ -274,17 +273,21 @@ class m3u8:
                     os.remove(th.args[1]);
                 except Exception as e:
                     pass;
-                # print("removed %s" % th.args[1]);
-                # self.retry_pool.append(myThread(target = th.func, args = th.args));
             else:
                 self.success_threads += 1;
         except KeyboardInterrupt:
-            # os.remove(th.args[1]);
+            try:
+                os.remove(th.args[1]);
+            except Exception as e:
+                pass;
             self.is_downloading = False;
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            # os.remove(th.args[1]);
+            try:
+                os.remove(th.args[1]);
+            except Exception as e:
+                pass;
             print("%s: %s" % (fn_name, e));
 
     def progressbar(self, ):
