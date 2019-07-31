@@ -29,66 +29,97 @@ class m3u8:
                 if(os.path.exists(self.from_file)):
                     self.content = open(self.from_file).read();
                 else:
-                    raise Exception("%s not found" % self.from_file);
+                    raise ValueError("%s not found" % self.from_file);
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
             print("m3u8.py::m3u8::__init__(): %s" % e);
 
-    def unify(self, url = None, ):
-        # download and unify the m3u8 document to a universal version (i.e. playable)
-        # calculates hash of content before returning
+    def calculate_hash(self, ):
+        fn_name = "m3u8.py::m3u8::calculate_hash()";
         try:
-            if(self.from_file):
-                self.hash = hashlib.md5(self.content.strip(' \n').encode('utf-8')).hexdigest();
+            self.hash = hashlib.md5(self.content.strip().encode('utf-8')).hexdigest();
+            return self.hash;
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("%s: %s" % (fn_name, e));
+            return None;
+
+    def check(self, document = None, ):
+        # checks whether document(hls format) is playable 
+        fn_name = "m3u8.py::m3u8::check()";
+        try:
+            if(document):
+                for line in document.splitlines():
+                    if(re.match(r'^#.*$', line)):
+                        continue;
+                    if(is_url(line) and is_ts(line)):
+                        continue;
+                    return False;
+                return True;
+            else:
+                document = self.content;
+                if(document):
+                    return self.check(document);
+                return False;
+        except KeyboardInterrupt:
+            print("\n KeyboardInterrupt, exiting");
+            exit();
+        except Exception as e:
+            print("%s: %s" % (fn_name, e));
+            return False;
+
+    def unify(self, url = None):
+        fn_name = "m3u8.py::m3u8::unify()";
+        try:
+            url = self.base_url if url == None else url;
+            if(self.check()):
+                self.calculate_hash();
                 return self.content;
-            if(url == None):
-                url = self.base_url;
             if(not is_url(url)):
-                raise Exception("no url found during download");
+                raise ValueError("'%s' is not an url, abort" % url);
+            document = get_content(url);
+            if(self.check(document)):
+                self.content = document;
+                self.calculate_hash();
+                return self.content;
             if(is_m3u8(url)):
-                content = get_content(url);
-                nurl = url;
-                for line in content.splitlines():
-                    if(re.match(r'^#.*?$', line)):
+                for line in document.splitlines():
+                    if(re.match(r'^#.*$', line)):
                         continue;
                     if(is_m3u8(line)):
-                        nurl = None;
                         if(line[0] == '/'):
-                            nurl = split_host(url) + line;
+                            url = split_host(url) + line;
                         else:
-                            nurl = re.sub(url.split('/')[-1], line, url);
-                        # print("nurl =", nurl);
-                        nurl = nurl.strip();
-                        content = get_content(nurl);
-                        break;
-                    else:
-                        break;
-                self.content = "";
-                for line in content.splitlines():
+                            url = re.sub(url.split('/')[-1], line, url);
+                        url = url.strip();
+                        document = get_content(url);
+                    break;
+                ret = "";
+                for line in document.splitlines():
                     if(not is_url(line) and is_ts(line)):
                         if(line[0] == '/'):
-                            host = split_host(url);
-                            line = host + line;
+                            line = split_host(url) + line;
                         else:
-                            line = re.sub(line, re.sub(nurl.split('/')[-1], line, nurl), line);
-                    self.content += line + '\n';
-            else:   # what's this
-                content = get_content(url);
-                nurl = re.findall(r'"(.*?m3u8)', content)[0];
-                if(not is_url(nurl)):
-                    nurl = split_host(url) + nurl;
-                # print(nurl);
-                self.unify(nurl);
-            self.hash = hashlib.md5(self.content.strip(' \n').encode('utf-8')).hexdigest();
+                            line = re.sub(url.split('/')[-1], line, url);
+                    ret += line + '\n';
+            else:
+                host = split_host(url);
+                url = re.findall(r'"(.*?\.m3u8)', document)[0];
+                if(not is_url(url)):
+                    url = host + url;
+                self.unify(url);
+            self.content = ret;
+            self.calculate_hash();
             return self.content;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
             exit();
         except Exception as e:
-            print("m3u8.py::m3u8::unify(): %s" % e);
-            return None;
+            print("%s: %s" % (fn_name, e));
 
     def download(self, dldir = None): # dldir: absolute path
         self.unify();
@@ -177,15 +208,6 @@ class m3u8:
                 os.makedirs(self.cache_dir);
             origin_dir = os.getcwd();
             os.chdir(self.cache_dir);
-            # if(os.path.exists(self.video_idname + ".m3u8")):
-            #     excontent = open(self.video_idname + ".m3u8").read();
-            #     if(excontent != self.content):
-            #         os.chdir("..");
-            #         shutil.rmtree(self.video_idname);
-            #         os.makedirs(self.video_idname);
-            #         os.chdir(self.cache_dir);
-            # with open(self.video_idname + ".m3u8", 'w') as f:
-            #     f.write(self.content);
 
             self.is_downloading = True;
             self.running_threads = 0;
@@ -204,10 +226,10 @@ class m3u8:
                 self.supervisor_list.append(sup);
             for sup in self.supervisor_list:
                 sup.join();
-
             self.is_downloading = False;
             holddir.join();
             progbar.join();
+
             os.chdir(origin_dir);
         except KeyboardInterrupt:
             self.is_downloading = False;
@@ -227,7 +249,6 @@ class m3u8:
                 return;
             fname = self.cache_fname;
             fd = open(fname, 'wb');
-            # os.chdir(self.cache_dir);
             for root, dirs, files in os.walk(self.cache_dir):
                 files.sort();
                 for file in files:
@@ -247,7 +268,6 @@ class m3u8:
         try:
             if(not os.path.exists(fpath)):
                 os.makedirs(fpath);
-            # os.chdir(fpath);
             if(fname == None):
                 fname = self.video_idname;
             ret = fname;
