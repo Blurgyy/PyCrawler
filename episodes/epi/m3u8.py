@@ -5,6 +5,7 @@ __author__ = "Blurgy";
 import os
 from os import environ as env
 import time
+import hashlib
 import shutil
 import requests
 from urllib.parse import unquote
@@ -23,6 +24,7 @@ class m3u8:
             self.from_ep = _from_ep;
             self.from_file = _from_file;
             self.content = None;
+            self.hash = None; # hash of self.content
             if(self.from_file != None):
                 if(os.path.exists(self.from_file)):
                     self.content = open(self.from_file).read();
@@ -34,9 +36,12 @@ class m3u8:
         except Exception as e:
             print("\033[1;31mm3u8.py::m3u8::__init__(): %s\033[0m" % e);
 
-    def unify(self, url = None, ):  # download and unify the m3u8 document to a universal version (i.e. playable)
+    def unify(self, url = None, ):
+        # download and unify the m3u8 document to a universal version (i.e. playable)
+        # calculates hash of content before returning
         try:
             if(self.from_file):
+                self.hash = hashlib.md5(self.content.strip(' \n').encode('utf-8')).hexdigest();
                 return self.content;
             if(url == None):
                 url = self.base_url;
@@ -76,6 +81,7 @@ class m3u8:
                     nurl = split_host(url) + nurl;
                 # print(nurl);
                 self.unify(nurl);
+            self.hash = hashlib.md5(self.content.strip(' \n').encode('utf-8')).hexdigest();
             return self.content;
         except KeyboardInterrupt:
             print("\n KeyboardInterrupt, exiting");
@@ -85,6 +91,7 @@ class m3u8:
             return None;
 
     def download(self, dldir = None): # dldir: absolute path
+        self.unify();
         self.url_pool = [];
         # self.retry_pool = [];
         self.is_downloading = False;
@@ -94,16 +101,13 @@ class m3u8:
         self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
         self.cache_dir = None;
         if(os.name == "nt"):
-            self.cache_dir = os.path.join(os.getcwd(), "cache");
+            self.cache_dir = os.path.join(os.getcwd(), "cache", self.hash);
         elif(os.name == "posix"):
-            self.cache_dir = os.path.join(env["HOME"] + "/.cache/blurgy/m3u8Download", self.video_idname);
+            self.cache_dir = os.path.join(env["HOME"], ".cache/blurgy/m3u8Download", self.hash);
         self.cache_fname = os.path.join(self.cache_dir, self.video_idname + ".ts");
-        self.unify();
         for line in self.content.splitlines():
             if(is_url(line) and is_ts(line)):
                 self.url_pool.append(line);
-        # print(self.cache_fname);
-        # input();
         self.dl_fname = None;
 
         fn_name = "m3u8.py::m3u8::download()";
