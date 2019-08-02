@@ -132,7 +132,7 @@ class m3u8:
         self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
         self.cache_dir = None;
         if(os.name == "nt"):
-            self.cache_dir = os.path.join(os.getcwd(), "cache", self.hash);
+            self.cache_dir = os.path.join(os.getcwd(), ".cache", self.hash);
         elif(os.name == "posix"):
             self.cache_dir = os.path.join(env["HOME"], ".cache/blurgy/m3u8Download", self.hash);
         self.cache_fname = os.path.join(self.cache_dir, self.video_idname + ".ts");
@@ -153,10 +153,11 @@ class m3u8:
             self.dl_fname = self.update_fname(dldir, self.video_idname);
             while(self.success_threads != len(self.url_pool)):
                 if(self.success_threads == 0):
-                    print("caching ..");
+                    print("-- caching ..");
                 else:
-                    print("validating: [%d / %d] .." % (self.success_threads, len(self.url_pool)))
+                    print("-- validating: [%d / %d] .." % (self.success_threads, len(self.url_pool)))
                 self.cache();
+                time.sleep(0.1);
             print("-- cache complete, concatenating..");
             self.concatenate();
             shutil.copy(self.cache_fname, self.dl_fname);
@@ -174,8 +175,8 @@ class m3u8:
             while(self.is_downloading):
                 if(not os.path.exists(directory)):
                     os.makedirs(directory);
+                time.sleep(0.1);
         except KeyboardInterrupt:
-            os.remove(target_file);
             self.is_downloading = False;
             print("\n KeyboardInterrupt, exiting");
             exit();
@@ -198,7 +199,7 @@ class m3u8:
             return False;
         except Exception as e:
             os.remove(target_file);
-            print("%s: %s" % (fn_name, e));
+            # print("%s: %s" % (fn_name, e));
             return False;
 
     def cache(self, ):
@@ -288,6 +289,7 @@ class m3u8:
         try:
             while(self.running_threads >= self.maximum_threads):
                 pass;
+                time.sleep(0.1);
             th.start();
             self.running_threads += 1;
             th.join();
