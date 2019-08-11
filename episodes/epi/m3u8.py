@@ -12,17 +12,20 @@ from urllib.parse import unquote
 from .globalfunctions import *
 
 class m3u8:
-    def __init__(self, _base_url = None, _from_ep = None, _from_file = None, ):
+    def __init__(self, _base_url = None, _from_ep = None, _from_file = None, _from_url = None):
         try:
             # print("initializing class m3u8 with (base_url = %s, from_ep = %s)" % (_base_url, _from_ep, ));
+            self.from_ep = _from_ep;
+            self.from_file = _from_file;
+            self.from_url = _from_url;
             self.base_url = _base_url;
             if(self.base_url != None):
                 if(not is_url(self.base_url)):
                     self.base_url = unquote(self.base_url);
                 if(not is_url(self.base_url)):
                     print("invalid m3u8 url");
-            self.from_ep = _from_ep;
-            self.from_file = _from_file;
+            elif(self.from_url != None):
+                self.base_url = self.from_url;
             self.content = None;
             self.hash = None; # hash of self.content
             if(self.from_file != None):
@@ -130,6 +133,8 @@ class m3u8:
         self.maximum_threads = 4;
         self.success_threads = 0;
         self.video_idname = self.from_ep.epname if(self.from_ep) else split_fname(self.from_file);
+        if(self.video_idname == None):
+            self.video_idname = "video";
         self.cache_dir = None;
         if(os.name == "nt"):
             self.cache_dir = os.path.join(os.getcwd(), ".cache", self.hash);

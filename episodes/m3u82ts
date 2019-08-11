@@ -16,6 +16,7 @@ from epi.globalfunctions import *
 
 
 from_file = None;
+from_url = None;
 dldir = None;
 if(len(sys.argv) == 1):
 	raise Exception("Too few arguments");
@@ -23,7 +24,10 @@ if(len(sys.argv) > 3):
 	raise Exception("Too many arguments");
 
 if(len(sys.argv) >= 2):
-	from_file = sys.argv[1];
+	if(is_url(sys.argv[1])):
+		from_url = sys.argv[1];
+	else:
+		from_file = sys.argv[1];
 if(len(sys.argv) == 3):
 	dldir = sys.argv[2];
 	if(not os.path.exists(dldir)):
@@ -31,5 +35,5 @@ if(len(sys.argv) == 3):
 	# os.chdir(dldir);
 	dldir = os.path.join(os.getcwd(), dldir);
 
-x = epi.m3u8(_from_file = from_file);
+x = epi.m3u8(_from_file = from_file, _from_url = from_url);
 x.download(dldir);
