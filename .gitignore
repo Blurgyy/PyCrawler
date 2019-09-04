@@ -1,3 +1,11 @@
+# misc
+downloading/
+
+# Images
+*.png
+*.jpg
+*.jpeg
+
 # Videos
 *.ts
 *.mp4
