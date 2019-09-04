@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rm -rv __pycache__/
+cd .metadata/
+rm -rv .stat .bak.stat .fail
