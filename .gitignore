@@ -28,6 +28,23 @@ cache/
 # HTTP Live Stream(HLS) files
 *.m3u8
 
+# typescript
+typescript
+
+# Usernames & Passwords
+*.sec
+*.secret
+
+# Mail lists
+*.to
+
+# Generated Status Record
+.metadata/
+*.stat
+*.rec
+*.fail
+*.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
