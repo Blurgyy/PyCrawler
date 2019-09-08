@@ -1,4 +1,5 @@
-> *Update*: 以下工作无限期停止更新
+> *Update*: [**rework**](https://github.com/Blurgyy/summer2019/tree/master/summer2019_mail)
+> <del>*Update*: 以下工作无限期停止更新</del>
 
 ***
 > - OUC信院新闻邮件推送服务，每 30 分钟检查一次更新 
