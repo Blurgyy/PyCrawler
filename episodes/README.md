@@ -1,5 +1,7 @@
 # episodes
 
+> *Update*: [rework](https://github.com/Blurgyy/summer2019/tree/master/summer2019_episodes)
+
 ## Features
 
 - 搜索
